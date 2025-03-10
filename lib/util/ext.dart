@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:guethub/common/encrypt/webvpn_new.dart';
 import 'package:guethub/data/network.dart';
 import 'package:intl/intl.dart';
 
@@ -24,9 +25,8 @@ extension ListRotateExtension<T> on List<T> {
 
 extension UriExtension on Uri {
   Uri toWebVpnUrl() {
-    return Uri.parse(this.toString() + "/");
-    // return Uri.parse(
-    //     "${AppNetwork.webVpnUrl}$scheme/${WebVPN.encryptHost(host)}/");
+    // return Uri.parse(this.toString() + "/");
+    return Uri.parse(getWebVPNUrl(this.toString()));
   }
 
   Uri removeQueryParams() {

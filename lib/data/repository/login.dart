@@ -14,6 +14,7 @@ import 'package:guethub/logger.dart';
 import 'package:rxdart/rxdart.dart';
 
 class LoginRepository {
+
   final _onLoginEvent = BehaviorSubject<User>();
 
   ValueStream<User> get onLoginEvent => _onLoginEvent.stream;
@@ -55,7 +56,7 @@ class LoginRepository {
       user.isPostgraduate = isPostgraduate;
 
       await LoginService.login(
-          AppNetwork.get(username: username).dio2, username, password,
+          AppNetwork.get(username: username).casDio, username, password,
           captchaHandler: captchaHandler,
           isOnlyUseOldSystem: isOnlyUseOldSystem,
           isOnlyUseNewSystem: user.isOnlyUseNewSystem(),
@@ -77,13 +78,13 @@ class LoginRepository {
   Future<DynamicCode> sendDynamicCode(String username) async =>
       LoginService.sendDynamicCode(
           username: username,
-          dio: AppNetwork.get().dio2,
+          dio: AppNetwork.get().casDio,
           isCampusNetwork:
               (await NetworkDetectionRepository.get().isCampusNetwork) ?? true);
 
   Future<ReAuth> reAuthCheck(String code) async => LoginService.reAuthCheck(
       code: code,
-      dio: AppNetwork.get().dio2,
+      dio: AppNetwork.get().casDio,
       isCampusNetwork:
           (await NetworkDetectionRepository.get().isCampusNetwork) ?? true);
 

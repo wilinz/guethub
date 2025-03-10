@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:guethub/data/network.dart';
 
 typedef RedirectCallback = bool Function(
     Response response, ResponseInterceptorHandler handler);
@@ -55,7 +56,8 @@ class RedirectInterceptor extends Interceptor {
         final option = Options(
           sendTimeout: requestOptions.sendTimeout,
           receiveTimeout: requestOptions.receiveTimeout,
-          extra: requestOptions.extra,
+          extra: requestOptions.extra
+            ..[BaseUrlInterceptor.enableAutoVpnUrl] = false,
           // headers: requestOptions.headers
           //   ..removeWhere((key, value) {
           //     return key.toLowerCase() == "cookie" || key.toLowerCase() == 'content-length';

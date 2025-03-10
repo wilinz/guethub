@@ -21,7 +21,7 @@ class EmptyClassRoom {
   @Deprecated("Old system")
   static Future<EmptyClassroomPageParameters>
       getEmptyClassRoomPageParameters() async {
-    final resp = await AppNetwork.get().utscGuetDio.get(_url);
+    final resp = await AppNetwork.get().casDio.get(_url);
     final doc = htmlParser.parse(resp.data);
     final viewState =
         doc.getElementById("__VIEWSTATE")?.attributes["value"] ?? "";
@@ -40,7 +40,7 @@ class EmptyClassRoom {
       required int startSequence,
       required int endSequence}) async {
     final parameters = await getEmptyClassRoomPageParameters();
-    final resp = await AppNetwork.get().utscGuetDio.post(_url,
+    final resp = await AppNetwork.get().casDio.post(_url,
         options: Options(
             contentType: AppNetwork.typeUrlEncode,
             responseType: ResponseType.plain),

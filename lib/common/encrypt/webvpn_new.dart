@@ -20,9 +20,9 @@ String getEncryptWebVpnHost(String host) =>
 String getDecryptWebVpnHost(String host) =>
     rsCrypto.getDecryptWebVpnHost(ciphertext: host, key: vpnKey, iv: vpnIV);
 
-Uri? getOrdinaryUriIfNeed(Uri uri) {
+Uri getOrdinaryUriIfNeed(Uri uri) {
   return uri.host == vpnHost
-      ? Uri.tryParse(getWebVPNOrdinaryUri(uri.toString()) ?? "")
+      ? Uri.parse(getWebVPNOrdinaryUri(uri.toString()))
       : uri;
 }
 

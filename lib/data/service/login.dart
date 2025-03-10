@@ -8,6 +8,7 @@ import 'package:guethub/data/model/dynamic_code/dynamic_code.dart';
 import 'package:guethub/data/model/dynamic_code/reauth.dart';
 import 'package:guethub/data/network.dart';
 import 'package:guethub/logger.dart';
+import 'package:guethub/ui/util/toast.dart';
 import 'package:guethub/util/ext.dart';
 import 'package:html/parser.dart' as htmlParser;
 import 'package:dio/dio.dart';
@@ -28,32 +29,41 @@ class LoginService {
       bool isPostgraduate = false,
       required bool isCampusNetwork}) async {
     if (!isCampusNetwork) {
-      // await loginCas(
-      //     dio: dio,
-      //     username: username,
-      //     password: password,
-      //     service: "https://v.guet.edu.cn/login?cas_login=true",
-      //     successVerify: (resp) {
-      //       final uriStr = resp.requestOptions.uri.toString();
-      //       final b1 = uriStr == 'https://v.guet.edu.cn/';
-      //       final b2 = (uriStr.contains("/wengine-vpn-token-login") &&
-      //           (resp.statusCode ?? 400) < 300);
-      //       return b1 || b2;
-      //     },
-      //     isCampusNetwork: isCampusNetwork,
-      //     captchaHandler: captchaHandler);
-      // // }
-      // await loginCas(
-      //     dio: dio,
-      //     username: username,
-      //     password: password,
-      //     service: "https://wvpn.guet.edu.cn/wengine-auth/login?cas_login=true",
-      //     successVerify: (resp) {
-      //       final html = resp.data as String;
-      //       return html.contains("您已成功完成反代认证");
-      //     },
-      //     isCampusNetwork: isCampusNetwork,
-      //     captchaHandler: captchaHandler);
+      await loginCas(
+          dio: dio,
+          username: username,
+          password: password,
+          service: "https://v.guet.edu.cn/login?cas_login=true",
+          serviceHomeUrl: "https://v.guet.edu.cn/",
+          successVerify: (resp) {
+            final uriStr = resp.requestOptions.uri.toString();
+            final data = resp.data;
+            final b1 = uriStr == 'https://v.guet.edu.cn/';
+            final b2 = (uriStr.contains("/wengine-vpn-token-login") &&
+                (resp.statusCode ?? 400) < 300);
+            final b3 = data is String && data.contains("个人信息");
+            return b1 || b2 || b3;
+          },
+          isCampusNetwork: isCampusNetwork,
+          captchaHandler: captchaHandler);
+
+      // try {
+      //   await loginCas(
+      //       dio: dio,
+      //       username: username,
+      //       password: password,
+      //       service:
+      //           "https://wvpn.guet.edu.cn/wengine-auth/login?cas_login=true",
+      //       successVerify: (resp) {
+      //         final html = resp.data as String;
+      //         return html.contains("您已成功完成反代认证");
+      //       },
+      //       isCampusNetwork: isCampusNetwork,
+      //       captchaHandler: captchaHandler);
+      // } catch (e) {
+      //   if (e is RequireLoginVerificationCodeException) rethrow;
+      //   toast("跳过登录 https://wvpn.guet.edu.cn");
+      //   print(e);
       // }
     }
 
@@ -63,11 +73,11 @@ class LoginService {
           username: username,
           password: password,
           service: "https://bkjwsrv.guet.edu.cn/",
+          serviceHomeUrl: "https://bkjwsrv.guet.edu.cn/",
           successVerify: (resp) {
-            final uri = resp.requestOptions.uri;
-            final targetHost = 'bkjwsrv.guet.edu.cn';
-            return uri.host == targetHost ||
-                uri.path.toString().contains(getDecryptWebVpnHost(targetHost));
+            final data = resp.data;
+            final result = data is String && data.contains("用户类型：学生");
+            return result;
           },
           isCampusNetwork: isCampusNetwork,
           captchaHandler: captchaHandler);
@@ -100,11 +110,10 @@ class LoginService {
         username: username,
         password: password,
         service: "https://bkjw.guet.edu.cn",
+        serviceHomeUrl: "https://bkjw.guet.edu.cn/",
         successVerify: (resp) {
-          final uri = resp.requestOptions.uri;
-          final targetHost = 'bkjw.guet.edu.cn';
-          final result = uri.host == targetHost ||
-              uri.path.toString().contains(WebVPN.encryptHost(targetHost));
+          final data = resp.data;
+          final result = data is String && data.contains("用户类型：学生");
           return result;
         },
         isCampusNetwork: isCampusNetwork,
@@ -118,6 +127,7 @@ class LoginService {
         username: username,
         password: password,
         service: "https://bkjwtest.guet.edu.cn/student/sso/login",
+        serviceHomeUrl: "https://bkjwtest.guet.edu.cn/student/home",
         successVerify: (resp) {
           final uri = resp.requestOptions.uri;
           return uri.toString().contains('/student/home');
@@ -145,19 +155,13 @@ class LoginService {
     return false;
   }
 
-  static String getCasBaseUrl(bool isCampusNetwork) {
-    // final baseUri = isCampusNetwork
-    //     ? "https://cas.guet.edu.cn/"
-    //     : Uri.parse("https://cas.guet.edu.cn").toWebVpnUrl().toString();
-    return "https://cas.guet.edu.cn/";
-  }
-
   static Future<Response> loginCas(
       {required Dio dio,
       required String username,
       required String password,
       required bool isCampusNetwork,
       required String service,
+      required String serviceHomeUrl,
       required CaptchaHandler captchaHandler,
       required bool Function(Response response) successVerify,
       String? firstGetUrl,
@@ -165,7 +169,15 @@ class LoginService {
     // https://portal.guet.edu.cn/sui/
     // 根据是否处于校园网动态获取 uri
     final isNoUseWebVpn = isCampusNetwork;
-    String getUri() => "${getCasBaseUrl(isNoUseWebVpn)}authserver/login";
+    String getUri() => "authserver/login";
+
+    final serviceHomeResponse = await dio.get(isCampusNetwork == true
+        ? serviceHomeUrl
+        : getWebVPNUrl(serviceHomeUrl));
+
+    if (successVerify(serviceHomeResponse)) {
+      return serviceHomeResponse;
+    }
 
     var uri = firstGetUrl ?? getUri();
 
@@ -185,13 +197,15 @@ class LoginService {
         await compute<String, Map<String, String?>>(_parseLoginHtml, resp.data);
     final aesKey = parseLoginHtmlResult["aesKey"];
     final execution = parseLoginHtmlResult["execution"];
+    if (aesKey == null || execution == null) {
+      logger.d(resp.requestOptions);
+      logger.d(resp);
+      throw LogonFailedException(
+          'http request to ${resp.requestOptions.uri} failed: aesKey is null');
+    }
 
     final captcha =
         await getCaptcha(dio, username, captchaHandler, isNoUseWebVpn);
-
-    if (aesKey == null || execution == null) {
-      throw LogonFailedException('aesKey is null');
-    }
 
     // 登录
     final uri1 = getUri();
@@ -217,7 +231,8 @@ class LoginService {
 
     reqUri = resp1.requestOptions.uri;
     checkVerification(reqUri);
-    if (successVerify(resp1)) {
+    final success = successVerify(resp1);
+    if (success) {
       return resp;
     }
     check401(resp1);
@@ -227,7 +242,7 @@ class LoginService {
   static Future<String> getCaptcha(Dio dio, String username,
       CaptchaHandler captchaHandler, bool isNoUseWebVpn) async {
     final checkNeedCaptchaResp = await dio.get(
-        "${getCasBaseUrl(isNoUseWebVpn)}authserver/checkNeedCaptcha.htl",
+        "authserver/checkNeedCaptcha.htl",
         queryParameters: {
           "username": username,
           "_": DateTime.timestamp().millisecondsSinceEpoch
@@ -238,7 +253,7 @@ class LoginService {
     logger.d("checkNeedCaptcha.data: ${checkNeedCaptcha}");
     if (checkNeedCaptcha['isNeed'] == true) {
       final image = await dio.get(
-          "${getCasBaseUrl(isNoUseWebVpn)}authserver/getCaptcha.htl?${DateTime.timestamp().millisecondsSinceEpoch}",
+          "authserver/getCaptcha.htl?${DateTime.timestamp().millisecondsSinceEpoch}",
           options: Options(responseType: ResponseType.bytes));
       final captcha = await captchaHandler(image.data);
       return captcha;
@@ -270,7 +285,7 @@ class LoginService {
       required String username,
       required bool isCampusNetwork}) async {
     final resp = await dio.post(
-        "${getCasBaseUrl(isCampusNetwork)}authserver/dynamicCode/getDynamicCodeByReauth.do",
+        "authserver/dynamicCode/getDynamicCodeByReauth.do",
         data: {
           "userName": username,
           "authCodeTypeName": "reAuthDynamicCodeType"
@@ -286,8 +301,7 @@ class LoginService {
       {required Dio dio,
       required String code,
       required bool isCampusNetwork}) async {
-    final resp = await dio.post(
-        "${getCasBaseUrl(isCampusNetwork)}authserver/reAuthCheck/reAuthSubmit.do",
+    final resp = await dio.post("authserver/reAuthCheck/reAuthSubmit.do",
         data: {
           "service": "",
           "reAuthType": 3,

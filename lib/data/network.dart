@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart' as getx;
 import 'package:get/get_core/src/get_main.dart';
 import 'package:guethub/common/encrypt/webvpn.dart';
+import 'package:guethub/common/encrypt/webvpn_new.dart';
 import 'package:guethub/data/get_storage.dart';
 import 'package:guethub/data/redirect_interceptor.dart';
 import 'package:guethub/data/repository/login.dart';
@@ -29,10 +30,13 @@ import 'package:guethub/path.dart';
 import 'package:guethub/ui/login/captcha_dialog.dart';
 import 'package:guethub/ui/login/verification_code_dialog.dart';
 import 'package:guethub/ui/util/toast.dart';
+import 'package:guethub/util/ext.dart';
 import 'package:kt_dart/kt.dart';
 import 'package:path/path.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'util/user_agent.dart';
 
 extension DioExt on Dio {
   Dio setFollowRedirects(bool followRedirects) {
@@ -60,20 +64,21 @@ class AppNetwork {
   static const String webVpnUrl = "https://v.guet.edu.cn/";
   static const String webVpnHost = "v.guet.edu.cn";
   static const String typeUrlEncode = "application/x-www-form-urlencoded";
-  static const String userAgent =
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
 
-  static VpnCookieInterceptor vpnCookieInterceptor(CookieJar cookieJar) =>
-      VpnCookieInterceptor(cookieJar: cookieJar, urls: [
-        'https://bkjw.guet.edu.cn',
-        'https://bkjwtest.guet.edu.cn',
-        'https://bkjwsrv.guet.edu.cn',
-        'https://classroom.guet.edu.cn',
-        'https://yjapp.guet.edu.cn',
-        'https://pcportal.guet.edu.cn',
-        'https://www.guet.edu.cn', // 图书馆
-        'http://202.193.70.166:8020', // 数据库导航
-      ]);
+  static String? _userAgent = null;
+  static String get userAgent => (_userAgent ??= getRandomUserAgent());
+
+  // static VpnCookieInterceptor vpnCookieInterceptor(CookieJar cookieJar) =>
+  //     VpnCookieInterceptor(cookieJar: cookieJar, urls: [
+  //       'https://bkjw.guet.edu.cn',
+  //       'https://bkjwtest.guet.edu.cn',
+  //       'https://bkjwsrv.guet.edu.cn',
+  //       'https://classroom.guet.edu.cn',
+  //       'https://yjapp.guet.edu.cn',
+  //       'https://pcportal.guet.edu.cn',
+  //       'https://www.guet.edu.cn', // 图书馆
+  //       'http://202.193.70.166:8020', // 数据库导航
+  //     ]);
 
   static CookieJar getAppCookieJar() {
     CookieJar cookieJar;
@@ -99,19 +104,34 @@ class AppNetwork {
     return cookieJar;
   }
 
-  static setupUstcGuetDio(Dio dio, CookieJar cookieJar) {
-    final url = "http://utsc.guet.edu.cn/";
+  static setupCasDio(Dio dio, CookieJar cookieJar) {
+    final url = "https://cas.guet.edu.cn/";
     dio.options = BaseOptions(
-      baseUrl: url,
-      headers: {"User-Agent": userAgent, "Referer": url},
-      followRedirects: true,
-      validateStatus: (int? status) => status != null,
-    );
-    dio.interceptors.addAll(
-        [BaseUrlInterceptor(), CookieManager(cookieJar), RefererInterceptor()]);
+        baseUrl: url,
+        headers: {"User-Agent": userAgent},
+        followRedirects: false,
+        validateStatus: (int? status) => status != null,
+        connectTimeout: Duration(minutes: 1),
+        receiveTimeout: Duration(minutes: 5),
+        sendTimeout: Duration(minutes: 5));
+    dio.interceptors.addAll([
+      BaseUrlInterceptor(),
+      CookieManager(cookieJar),
+      RedirectInterceptor(dio),
+      RefererInterceptor(),
+      DioExceptionInterceptor(),
+      RetryInterceptor(
+          dio: dio,
+          logPrint: (msg) {
+            logger.i(msg);
+          },
+          toNoInternetPageNavigator: () async {},
+          retries: 3,
+          retryDelays: [Duration(milliseconds: 100)])
+    ]);
     // _proxy(dio);
     setupGuetProxy(dio);
-    // setDioLogger(dio);
+    setDioLogger(dio);
     return dio;
   }
 
@@ -126,7 +146,7 @@ class AppNetwork {
         sendTimeout: Duration(minutes: 5));
     dio.interceptors.addAll([
       BaseUrlInterceptor(),
-      AppNetwork.vpnCookieInterceptor(cookieJar),
+      // AppNetwork.vpnCookieInterceptor(cookieJar),
       CookieManager(cookieJar),
       GuetLoginInterceptor(cookieJar),
       RedirectInterceptor(dio),
@@ -275,7 +295,7 @@ class AppNetwork {
   // }
 
   late Dio _bkjwDio;
-  late Dio utscGuetDio;
+  late Dio casDio;
   late Dio bkjwTestDio;
   late Dio noProxyDio;
   late Dio appDio;
@@ -331,7 +351,7 @@ class AppNetwork {
         ..httpClientAdapter = Http2Adapter(
           ConnectionManager(idleTimeout: Duration(seconds: 10)),
         );
-      instance.utscGuetDio = setupUstcGuetDio(newDio(), instance.cookieJar);
+      instance.casDio = setupCasDio(newDio(), instance.cookieJar);
       instance.bkjwTestDio = setupBkjwTestDio(newDio(), instance.cookieJar);
       instance.noProxyDio = setupNoProxyDio(newDio(), instance.cookieJar);
       instance.appDio =
@@ -450,7 +470,7 @@ class GuetLoginInterceptor extends Interceptor {
     );
     dio.interceptors.addAll([
       BaseUrlInterceptor(),
-      AppNetwork.vpnCookieInterceptor(cookieJar),
+      // AppNetwork.vpnCookieInterceptor(cookieJar),
       CookieManager(cookieJar),
       RedirectInterceptor(dio),
       RefererInterceptor(),
@@ -641,43 +661,48 @@ class GuetLoginInterceptor extends Interceptor {
 }
 
 class BaseUrlInterceptor extends Interceptor {
+
+  static const String enableAutoVpnUrl = "enableAutoVpnUrl";
+
   final hosts = [
-    // "bkjwsrv.guet.edu.cn",
+    "bkjwsrv.guet.edu.cn",
     "bkjw.guet.edu.cn",
     // "utsc.guet.edu.cn",
-    // "bkjwtest.guet.edu.cn",
+    "bkjwtest.guet.edu.cn",
+    "cas.guet.edu.cn"
   ];
 
   @override
   Future<void> onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
-    if (hosts.contains(options.uri.host)) {
-      if (options.uri.host == "bkjw.guet.edu.cn") {
+    var newOptions = options;
+    final enableAutoVpnUrlValue = options.extra[enableAutoVpnUrl] as bool? ?? true;
+
+    if (hosts.contains(newOptions.uri.host)) {
+      if (newOptions.uri.host == "bkjw.guet.edu.cn") {
         final user = await UserRepository.get().getActiveUser();
         if (user?.isUpgradedUndergrad == true) {
-          final uri =
-              Uri.parse(options.baseUrl).replace(host: "bkjwsrv.guet.edu.cn");
-          final newOptions = options.copyWith(baseUrl: uri.toString());
-          handler.next(newOptions);
-          return;
+          final uri = newOptions.uri
+              .replace(host: "bkjwsrv.guet.edu.cn");
+          newOptions = newOptions.copyWith(baseUrl: uri.toString());
         }
       }
-      // final isCampusNetwork =
-      //     await NetworkDetectionRepository.get().isCampusNetwork;
-      // final base = Uri.parse(options.baseUrl);
+      if(enableAutoVpnUrlValue) {
+        final isCampusNetwork =
+            await NetworkDetectionRepository.get().isCampusNetwork;
+        final uri = newOptions.uri;
 
-      // if (isCampusNetwork != true &&
-      //     base?.host != AppNetwork.webVpnHost &&
-      //     base?.query.contains(AppNetwork.webVpnHost) != true) {
-      //   final uri = Uri.parse(options.baseUrl).toWebVpnUrl().toString();
-      //   logger.d(options.baseUrl);
-      //   logger.d(uri);
-      //   final newOptions = options.copyWith(baseUrl: uri);
-      //   handler.next(newOptions);
-      //   return;
-      // }
+        if (isCampusNetwork != true &&
+            uri.host != AppNetwork.webVpnHost &&
+            uri.query.contains(AppNetwork.webVpnHost) != true) {
+          final vpnUrl = Uri.parse(getWebVPNUrl(uri.toString()));
+          logger.d(vpnUrl);
+          logger.d(uri);
+          newOptions = newOptions.copyWith(baseUrl: vpnUrl.getBaseUrl(), path: vpnUrl.path);
+        }
+      }
     }
-    handler.next(options);
+    handler.next(newOptions);
   }
 }
 
@@ -705,11 +730,7 @@ class DioExceptionInterceptor extends Interceptor {
 class RefererInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    // 从请求URL获取Referer（这里假设Referer是请求URL的主机部分）
-    Uri uri = Uri.parse(options.uri.toString());
-    String referer = '${uri.scheme}://${uri.host}';
-
-    options.headers['Referer'] = referer;
+    options.headers['Referer'] = options.uri.toString();
     handler.next(options);
   }
 }
