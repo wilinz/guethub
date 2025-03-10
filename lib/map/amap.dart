@@ -16,7 +16,7 @@ Future<void> initAmap() async {
   // AMapFlutterLocation.setApiKey(AmapConfig.androidApiKey, AmapConfig.iosApiKey);
   // AMapFlutterLocation.updatePrivacyShow(true, true);
   // AMapFlutterLocation.updatePrivacyAgree(true);
-  final ok = await setAMapKey(
+  final ok = await FlAMap().setAMapKey(
       iosKey: AmapConfig.iosApiKey,
       androidKey: AmapConfig.androidApiKey);
 

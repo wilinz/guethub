@@ -109,7 +109,7 @@ dependencies:
   flutter_svg: ^2.0.14
   flutter_image_compress: ^2.3.0
   uuid: ^4.5.1
-  fl_amap: ^3.0.2
+  fl_amap: ^3.4.2
   pointycastle: ^3.9.1
   dio_http2_adapter: ^2.6.0
   flutter_inappwebview: ^6.1.5
