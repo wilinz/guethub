@@ -135,51 +135,57 @@ class _LoginPageState extends State<LoginPage> {
                           initialData: null),
                       SizedBox(height: 16),
                       // 添加用户协议和隐私政策同意条款
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Obx(
-                                () => Checkbox(
-                              value: c.agreeToTerms.value,
-                              onChanged: (value) {
-                                c.agreeToTerms.value = value ?? false;
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            child: RichText(
-                              text: TextSpan(
-                                style: Theme.of(context).textTheme.bodyMedium,
-                                children: [
-                                  TextSpan(text: '我已阅读并同意 '),
-                                  TextSpan(
-                                    text: '《用户协议》',
-                                    style: TextStyle(
-                                      color: Colors.blue,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        Get.toNamed(AppRoute.userAgreementPage);
-                                      },
-                                  ),
-                                  TextSpan(text: ' 和 '),
-                                  TextSpan(
-                                    text: '《隐私政策》',
-                                    style: TextStyle(
-                                      color: Colors.blue,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        Get.toNamed(AppRoute.privacyPolicyPage);
-                                      },
-                                  ),
-                                ],
+                      InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: (){
+                          c.agreeToTerms.toggle();
+                        },
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Obx(
+                                  () => Checkbox(
+                                value: c.agreeToTerms.value,
+                                onChanged: (value) {
+                                  c.agreeToTerms.value = value ?? false;
+                                },
                               ),
                             ),
-                          ),
-                        ],
+                            Expanded(
+                              child: RichText(
+                                text: TextSpan(
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                  children: [
+                                    TextSpan(text: '我已阅读并同意 '),
+                                    TextSpan(
+                                      text: '《用户协议》',
+                                      style: TextStyle(
+                                        color: Colors.blue,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () {
+                                          Get.toNamed(AppRoute.userAgreementPage);
+                                        },
+                                    ),
+                                    TextSpan(text: ' 和 '),
+                                    TextSpan(
+                                      text: '《隐私政策》',
+                                      style: TextStyle(
+                                        color: Colors.blue,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () {
+                                          Get.toNamed(AppRoute.privacyPolicyPage);
+                                        },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       SizedBox(height: 16),
                       Obx(() => ElevatedButton(
