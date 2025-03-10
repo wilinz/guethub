@@ -1,22 +1,25 @@
 use base64::Engine;
 use hex::{self, decode as hex_decode, encode as hex_encode};
-use openssl::symm::{decrypt, encrypt, Cipher};
+
 use rand::distr::Alphanumeric;
 use rand::{rng, Rng};
+use block_modes::{BlockMode, Cbc};
+use std::str;
+use aes::{Aes128, NewBlockCipher};
+use block_modes::block_padding::Pkcs7;
+use cipher::KeyInit;
+use crate::api::cfbcrypto::AesCfb;
 
 #[flutter_rust_bridge::frb(sync)]
 pub fn get_encrypt_web_vpn_host(plaintext: &str, key: &[u8], iv: &[u8]) -> String {
-    let cipher = Cipher::aes_128_cfb128();
-    let encrypted =
-        encrypt(cipher, key, Some(iv), plaintext.as_bytes()).expect("Encryption failed");
+    let encrypted = AesCfb::new(key, iv).encrypt(plaintext.as_bytes());
     hex_encode(encrypted)
 }
 
 #[flutter_rust_bridge::frb(sync)]
 pub fn get_decrypt_web_vpn_host(ciphertext: &str, key: &[u8], iv: &[u8]) -> String {
     let ct = hex_decode(ciphertext).expect("Invalid hex");
-    let cipher = Cipher::aes_128_cfb128();
-    let decrypted = decrypt(cipher, key, Some(iv), &ct).expect("Decryption failed");
+    let decrypted = AesCfb::new(key, iv).decrypt(&ct);
     String::from_utf8(decrypted).expect("Invalid UTF-8")
 }
 
@@ -88,6 +91,8 @@ pub fn get_web_vpn_ordinary_url(url: &str, key: &[u8], iv: &[u8]) -> String {
     }
 }
 
+type Aes128Cbc = Cbc<Aes128, Pkcs7>;
+
 #[flutter_rust_bridge::frb(sync)]
 // 加密函数
 pub fn encrypt_aes_128_cbc_64prefix(plain: &str, key: &[u8]) -> String {
@@ -110,12 +115,10 @@ pub fn encrypt_aes_128_cbc_64prefix(plain: &str, key: &[u8]) -> String {
     // 拼接随机字符串和密码
     let plaintext = format!("{}{}", random_str, plain);
 
-    // 使用 AES-CBC 加密
-    let cipher = Cipher::aes_128_cbc(); // 根据密钥长度选择 AES-128/192/256
-    let encrypted =
-        encrypt(cipher, &key, Some(&iv), plaintext.as_bytes()).expect("Encryption failed");
-
-    base64::engine::general_purpose::STANDARD.encode(&encrypted)
+    let cipher = Aes128Cbc::new_from_slices(&key, &iv).expect("Aes128Cbc::new_from_slices failed");
+    let plain = plaintext.as_bytes();
+    let ciphertext = cipher.encrypt_vec(plain);
+    base64::engine::general_purpose::STANDARD.encode(&ciphertext)
 }
 
 #[flutter_rust_bridge::frb(sync)]
@@ -135,17 +138,9 @@ pub fn decrypt_aes_128_cbc_64prefix(encrypted_base64: &str, key: &[u8]) -> Strin
     let mut iv = [0u8; 16];
     rng().fill(&mut iv);
 
-    // 使用 AES-CBC 解密
-    let cipher = Cipher::aes_128_cbc(); // 根据密钥长度选择 AES-128/192/256
-    let decrypted = decrypt(cipher, &key, Some(&iv), &encrypted_data)
-        .expect("Decryption failed")
-        .split_off(64);
-
-    // 将解密结果转换为字符串
-    let decrypted_str = String::from_utf8(decrypted).expect("Invalid UTF-8");
-
-    // 提取原始密码（去掉前面的 64 字节随机字符串）
-    decrypted_str
+    let cipher = Aes128Cbc::new_from_slices(&key, &iv).unwrap();
+    let decrypted = cipher.decrypt_vec(&encrypted_data).expect("Decryption failed").split_off(64);
+    String::from_utf8(decrypted).expect("Invalid UTF-8")
 }
 
 #[flutter_rust_bridge::frb(init)]
