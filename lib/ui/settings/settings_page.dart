@@ -82,10 +82,10 @@ class SettingsPage extends StatelessWidget {
               ),
               ListTile(
                 onTap: () async {
-                  launchUrl(Uri.parse("https://github.com/wilinz/guet_toolbox"), mode: LaunchMode.externalApplication);
+                  launchUrl(Uri.parse("https://github.com/wilinz/guethub"), mode: LaunchMode.externalApplication);
                 },
                 leading: Icon(Icons.account_circle_outlined),
-                title: Text("开源地址：https://github.com/wilinz/guet_toolbox"),
+                title: Text("开源地址：https://github.com/wilinz/guethub"),
                 trailing: Icon(Icons.arrow_forward_ios_outlined),
               ),
               ListTile(

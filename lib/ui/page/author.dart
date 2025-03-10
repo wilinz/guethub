@@ -28,7 +28,7 @@ class AuthorsPage extends StatelessWidget {
       avatar: 'assets/images/zhangluo.jpg',
       nickname: 'zhangluo',
       qq: '643733581',
-      github: 'https://github.com/1zhangluo1',
+      github: 'https://github.com/roselle-luo',
     ),
   ];
 
