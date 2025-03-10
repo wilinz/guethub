@@ -353,19 +353,22 @@ class VpnCookieInterceptor extends Interceptor {
   VpnCookieInterceptor({required this.cookieJar, required this.urls});
 
   @override
-  void onResponse(Response response, ResponseInterceptorHandler handler) {
+  Future<void> onResponse(
+      Response response, ResponseInterceptorHandler handler) async {
     if (response.requestOptions.uri.host == 'wvpn.guet.edu.cn' &&
         response.headers.map.containsKey('set-cookie')) {
-      _saveCookies(response).then((_) => handler.next(response)).catchError(
-        (dynamic e, StackTrace s) {
-          final err = DioException(
-            requestOptions: response.requestOptions,
-            error: e,
-            stackTrace: s,
-          );
-          handler.reject(err, true);
-        },
-      );
+      try {
+        await _saveCookies(response);
+        handler.next(response);
+      } catch (e, s) {
+        final err = DioException(
+          requestOptions: response.requestOptions,
+          error: e,
+          stackTrace: s,
+        );
+        handler.reject(err, true);
+      }
+      return;
     }
     super.onResponse(response, handler);
   }
