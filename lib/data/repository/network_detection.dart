@@ -1,11 +1,14 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../network.dart';
 import '../service/network_detection.dart';
 
 class NetworkDetectionRepository {
+
+  Dio dio = Dio();
 
   bool? get isCampusNetworkCache => isCampusNetworkState.valueOrNull;
 
@@ -22,7 +25,7 @@ class NetworkDetectionRepository {
   }
 
   Future<bool> _isCampusNetwork() async {
-    return NetworkDetectionService.isCampusNetwork();
+    return NetworkDetectionService.isCampusNetwork(dio);
   }
 
   NetworkDetectionRepository._();
