@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:guethub/data/repository/login.dart';
 import 'package:guethub/data/service/login.dart';
 import 'package:guethub/data/model/user/user.dart';
+import 'package:guethub/logger.dart';
 import 'package:guethub/ui/login/captcha_dialog.dart';
 import 'package:guethub/ui/login/verification_code_dialog.dart';
 import 'package:get/get.dart';
@@ -114,7 +115,8 @@ class LoginViewModel extends GetxController {
           login(context, formKey, popUpAfterSuccess);
           return;
         }
-      } catch (e) {
+      } catch (e, st) {
+        logger.e("登录失败：", error: e, stackTrace: st);
         var error = e.toString();
         if (error.contains("密码有误") && i != retryCount - 1) {
           continue;
