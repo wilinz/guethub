@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:guethub/common/encrypt/webvpn_new.dart';
 import 'package:guethub/data/network.dart';
+import 'package:guethub/data/repository/network_detection.dart';
 import 'package:guethub/ui/page/webview/webview.dart';
 import 'package:guethub/ui/route.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:guethub/ui/util/toast.dart';
+
+Future<String> getWebViewUrl(String url) async {
+  final isCampusNetwork =
+      await NetworkDetectionRepository.get().isCampusNetwork;
+  if(isCampusNetwork == true) return url;
+  return getWebVPNUrl(url);
+}
 
 // 定义实体类 ToolboxItem
 class ToolboxItem {
@@ -61,6 +70,10 @@ class _ToolboxState extends State<Toolbox> {
     ToolboxItem(
       title: "课程直播平台（手机版）",
       url: "https://yjapp.guet.edu.cn",
+    ),
+    ToolboxItem(
+      title: "智慧教学平台（手机版）",
+      url: "https://mobile.guet.edu.cn",
     ),
     // ToolboxItem(
     //   title: "图书馆",
@@ -140,7 +153,7 @@ class _ToolboxState extends State<Toolbox> {
   }
 
   Future<void> launcherWebView(ToolboxItem item) async {
-    Get.toNamed(AppRoute.webView, arguments: WebViewArgs(url: item.url));
+    Get.toNamed(AppRoute.webView, arguments: WebViewArgs(url: getWebVPNUrl(item.url)));
   }
 
 }
