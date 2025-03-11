@@ -29,9 +29,8 @@ List<dynamic>? extractSemesters(String jsCode) {
 }
 
 Map<String, dynamic>? extractCurrentSemester(String jsCode) {
-  RegExp currentSemesterRegExp = RegExp(
-      r'(var|let|const)\s+currentSemester\s*=\s*(.*);',
-      multiLine: true);
+  RegExp currentSemesterRegExp =
+      RegExp(r'(var|let|const)\s+currentSemester\s*=\s*(.*);', multiLine: true);
 
   RegExpMatch? currentSemesterMatch = currentSemesterRegExp.firstMatch(jsCode);
   if (currentSemesterMatch != null) {
@@ -66,8 +65,7 @@ class TermService {
 
   static Future<(List<Semester>, CurrentSemesters)> getSemesters(
       Dio dio) async {
-    final resp = await dio
-        .get('student/for-std/course-table');
+    final resp = await dio.get('student/for-std/course-table');
     final data = resp.data;
     final doc = htmlParser.parse(data);
     final scripts = doc
@@ -75,7 +73,9 @@ class TermService {
         .map((e) => e.text)
         .toList()
         .join('\n\n');
-    final semesters = extractSemesters(scripts)!;
+
+    final semesters = extractSemesters(scripts);
+    if (semesters == null) throw Exception('Semesters not found');
     final currentSemester = extractCurrentSemester(scripts)!;
     return (
       semestersListFormJson(semesters),
