@@ -31,7 +31,7 @@ class ExamScheduleRepository {
       if (dbData.isNotEmpty) return dbData;
     }
 
-    var data = await ExamScheduleService.getExamScheduleNew();
+    var data = await ExamScheduleService.getExamScheduleNew(studentId: user.newSystemStudentId!);
     data = data.map((e) => e..username = user.username).toList();
     cache[cacheKey] = data;
     final db = await getDatabase();

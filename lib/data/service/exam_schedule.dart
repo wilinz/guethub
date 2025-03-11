@@ -33,9 +33,9 @@ class ExamScheduleService {
 
   // https://bkjwtest.guet.edu.cn/student/for-std/exam-arrange
   // 302 to https://bkjwtest.guet.edu.cn/student/for-std/exam-arrange/info/104676
-  static Future<List<ExamSchedule>> getExamScheduleNew() async {
+  static Future<List<ExamSchedule>> getExamScheduleNew({required int studentId}) async {
     final resp =
-        await AppNetwork.get().bkjwTestDio.get("student/for-std/exam-arrange");
+        await AppNetwork.get().bkjwTestDio.get("student/for-std/exam-arrange/info/${studentId}");
     final data = await compute<String, List<Map<String, dynamic>>>(
         _parseSchedules, resp.data);
     return examScheduleListFormJson(data);;
