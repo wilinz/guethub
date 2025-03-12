@@ -1,17 +1,24 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:guethub/data/database/database.dart';
 import 'package:guethub/data/get_storage.dart';
 import 'package:guethub/data/model/exam_scores/exam_scores.dart';
 import 'package:guethub/data/model/exam_scores_new/exam_scores_new.dart';
 import 'package:guethub/data/model/exam_scores_sort/exam_scores_sort.dart';
+import 'package:guethub/data/network.dart';
 import 'package:guethub/data/repository/common.dart';
 import 'package:guethub/data/repository/user.dart';
 import 'package:guethub/data/service/exam_scores.dart';
 import 'package:html/dom.dart';
-import 'package:html/parser.dart' as html_parser;import 'package:guethub/logger.dart';
+import 'package:html/parser.dart' as html_parser;
+import 'package:guethub/logger.dart';
 
 class ExamScoresRepository {
+  Future<Dio> get oldDio => AppNetwork.get().bkjwDio;
+
+  Future<Dio> get dio => AppNetwork.get().bkjwTestDio;
+
   static const String oldExamScoresCacheKey = "old_exam_scores_cache_key";
 
   Future<ExamScoresResponse?> getExamScoresCache() async {
@@ -41,8 +48,8 @@ class ExamScoresRepository {
     int limit = 100,
   }) async {
     try {
-      final resp = await ExamScoresService.getExamScores(
-              term: term, sort: sort, page: page, start: start, limit: limit);
+      final resp = await ExamScoresService.getExamScores(await oldDio,
+          term: term, sort: sort, page: page, start: start, limit: limit);
       setExamScoresCache(resp);
       return resp;
     } catch (e) {
@@ -66,9 +73,9 @@ class ExamScoresRepository {
 
   Future<List<ExamScoresNew>> getExamScoresNew() async {
     try {
-      final data = await ExamScoresService.getExamScoresNew();
+      final data = await ExamScoresService.getExamScoresNew(await dio);
       data.examScoresNews =
-              data.examScoresNews.map((list) => handleData(list)).toList();
+          data.examScoresNews.map((list) => handleData(list)).toList();
       return data.examScoresNews.expand((e) => e).toList();
     } catch (e) {
       logger.e(e);

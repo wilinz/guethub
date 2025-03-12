@@ -9,6 +9,7 @@ import 'package:guethub/common/list.dart';
 import 'package:guethub/data/model/majors/majors_response.dart';
 import 'package:guethub/data/model/plan_course/plan_course_response.dart';
 import 'package:guethub/data/model/term/term.dart';
+import 'package:guethub/data/network.dart';
 import 'package:guethub/data/service/course.dart';
 import 'package:guethub/logger.dart';
 import 'package:guethub/main.dart';
@@ -467,7 +468,11 @@ class _CourseSelectionPageOldState extends State<CourseSelectionPageOld> {
   @override
   void initState() {
     super.initState();
-    CourseService.selectPage().then((value) {
+    initAsync();
+  }
+
+  Future<void> initAsync() async {
+    CourseService.selectPage(await AppNetwork.get().bkjwDio).then((value) {
       logger.d(value);
       Future.wait([
         viewModel.getTermList(isFlush: true),
@@ -479,4 +484,5 @@ class _CourseSelectionPageOldState extends State<CourseSelectionPageOld> {
       return value;
     });
   }
+
 }

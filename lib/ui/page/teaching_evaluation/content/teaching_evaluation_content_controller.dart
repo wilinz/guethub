@@ -104,7 +104,7 @@ class TeachingEvaluationContentController extends GetxController {
     logger.d(JsonEncoder.withIndent("  ").convert(body));
 
     final resp = await TeachingEvaluationService.submit(
-        AppNetwork.get().bkjwTestDio,
+        await AppNetwork.get().bkjwTestDio,
         body: body);
     if (resp['ok'] == true) {
       toastSuccess0("成功");

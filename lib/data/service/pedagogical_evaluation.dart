@@ -7,26 +7,25 @@ import 'package:guethub/data/model/pedagogical_evaluation/pedagogical_evaluation
 import 'package:guethub/data/network.dart';
 
 class PedagogicalEvaluationService {
-  static Future<List<PedagogicalEvaluation>> get(String term) async {
-    final resp = await AppNetwork.get().bkjwDio
-        .get("student/getpjcno", queryParameters: {"term": term});
+  static Future<List<PedagogicalEvaluation>> get(Dio dio, String term) async {
+    final resp =
+        await dio.get("student/getpjcno", queryParameters: {"term": term});
     final respData = PedagogicalEvaluationResponse.fromJson(resp.data);
     return respData.data;
   }
 
   static Future<List<PedagogicalEvaluationQuestion>> getQuestions(
-      String term, String courseno, String teacherno) async {
-    final resp = await AppNetwork.get().bkjwDio.get("student/jxpgdata",
-        queryParameters: {
-          "term": term,
-          "courseno": courseno,
-          "teacherno": teacherno
-        });
+      Dio dio, String term, String courseno, String teacherno) async {
+    final resp = await dio.get("student/jxpgdata", queryParameters: {
+      "term": term,
+      "courseno": courseno,
+      "teacherno": teacherno
+    });
     final respData = PedagogicalEvaluationQuestionsResponse.fromJson(resp.data);
     return respData.data;
   }
 
-  static Future<CommonResponse> submitQuestions(
+  static Future<CommonResponse> submitQuestions(Dio dio,
       {required String term,
       required String courseid,
       required String courseno,
@@ -38,7 +37,7 @@ class PedagogicalEvaluationService {
             resp, term, courseid, teacherno, courseno, lb))
         .where((e) => e != null)
         .toList();
-    final resp = await AppNetwork.get().bkjwDio.post("student/SaveJxpg",
+    final resp = await dio.post("student/SaveJxpg",
         queryParameters: {
           "term": term,
           "courseno": courseno,
@@ -49,31 +48,28 @@ class PedagogicalEvaluationService {
     return respData;
   }
 
-  static Future<CommonResponse> submit(
+  static Future<CommonResponse> submit(Dio dio,
       {required PedagogicalEvaluation data,
       required String comment,
       required num score,
       required bool isSaveOnly}) async {
     //  student/SaveJxpgJg
     final path = isSaveOnly ? "student/SaveJxpgJg" : "student/SaveJxpgJg/1";
-    final resp = await AppNetwork.get().bkjwDio.post(path,
+    final resp = await dio.post(path,
         data: PedagogicalEvaluationData.fromResponse(data, comment, score)
             .toJson(),
         options: Options(contentType: AppNetwork.typeUrlEncode));
     return CommonResponse.fromJson(resp.data);
   }
 
-  static Future<PedagogicalEvaluationData> getCurrent(
+  static Future<PedagogicalEvaluationData> getCurrent(Dio dio,
       {required String term,
       required String courseno,
       required String teacherno}) async {
-    final resp = await AppNetwork.get().bkjwDio.post("student/JxpgJg",
-        data: {
-          "term": term,
-          "courseno": courseno,
-          "teacherno": teacherno
-        });
-    final respData = PedagogicalEvaluationData.fromJson(CommonResponse.fromJson(resp.data).data);
+    final resp = await dio.post("student/JxpgJg",
+        data: {"term": term, "courseno": courseno, "teacherno": teacherno});
+    final respData = PedagogicalEvaluationData.fromJson(
+        CommonResponse.fromJson(resp.data).data);
     return respData;
   }
 //  student/JxpgJg

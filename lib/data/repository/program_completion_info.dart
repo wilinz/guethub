@@ -6,15 +6,15 @@ import 'package:guethub/data/network.dart';
 import 'package:guethub/data/service/program_completion_info.dart';
 
 class ProgramCompletionInfoRepository {
-  Dio get dio => AppNetwork.get().bkjwTestDio;
+  Future<Dio> get dio => AppNetwork.get().bkjwTestDio;
 
   Future<GraduateInfo?> getGraduateInfo() async {
-    return ProgramCompletionInfoService.getGraduateInfo(dio);
+    return ProgramCompletionInfoService.getGraduateInfo(await dio);
   }
 
   Future<ProgramCompletionInfo> getProgramCompletionInfo(
       {required String programId}) async {
-    return await ProgramCompletionInfoService.getProgramCompletionInfo(dio,
+    return await ProgramCompletionInfoService.getProgramCompletionInfo(await dio,
         programId: programId);
   }
 
@@ -30,7 +30,7 @@ class ProgramCompletionInfoRepository {
   }
 
   Future<List<CreditsCourseInfo>> getCreditsCourseInfo1({required String programId}) async {
-    final info = await ProgramCompletionInfoService.getProgramCompletionInfo(dio,
+    final info = await ProgramCompletionInfoService.getProgramCompletionInfo(await dio,
         programId: programId);
     return getCreditsCourseInfo(info);
   }

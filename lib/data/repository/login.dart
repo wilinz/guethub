@@ -56,7 +56,7 @@ class LoginRepository {
       user.isPostgraduate = isPostgraduate;
 
       await LoginService.login(
-          AppNetwork.get(username: username).casDio, username, password,
+          await AppNetwork.get(username: username).casDio, username, password,
           captchaHandler: captchaHandler,
           isOnlyUseOldSystem: isOnlyUseOldSystem,
           isOnlyUseNewSystem: user.isOnlyUseNewSystem(),
@@ -78,13 +78,13 @@ class LoginRepository {
   Future<DynamicCode> sendDynamicCode(String username) async =>
       LoginService.sendDynamicCode(
           username: username,
-          dio: AppNetwork.get().casDio,
+          dio: await AppNetwork.get().casDio,
           isCampusNetwork:
               (await NetworkDetectionRepository.get().isCampusNetwork) ?? true);
 
   Future<ReAuth> reAuthCheck(String code) async => LoginService.reAuthCheck(
       code: code,
-      dio: AppNetwork.get().casDio,
+      dio: await AppNetwork.get().casDio,
       isCampusNetwork:
           (await NetworkDetectionRepository.get().isCampusNetwork) ?? true);
 

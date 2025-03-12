@@ -8,27 +8,28 @@ import '../model/template.dart';
 import '../network.dart';
 
 class CourseService {
-  static Future<List<OldCourse>> getCourseList(String term) async {
-    final resp = await AppNetwork.get().bkjwDio
+  static Future<List<OldCourse>> getCourseList(Dio dio, String term) async {
+    final resp = await dio
         .get("student/getstutable", queryParameters: {"term": term});
     final respData = CourseResponse.fromJson(resp.data);
     return respData.data;
   }
 
-  static Future<List<CourseLab>> getCourseLabList(String term) async {
-    final resp = await AppNetwork.get().bkjwDio
+  static Future<List<CourseLab>> getCourseLabList(Dio dio, String term) async {
+    final resp = await dio
         .get("student/getlabtable", queryParameters: {"term": term});
     final respData = CourseLabResponse.fromJson(resp.data);
     return respData.data;
   }
 
   static Future<List<PlanCourse>> getPlan(
-    String term,
+      Dio dio,
+      String term,
     String grade,
     String dptno,
     String spno,
   ) async {
-    final resp = await AppNetwork.get().bkjwDio.get("student/GetPlan",
+    final resp = await dio.get("student/GetPlan",
         queryParameters: {
           "term": term,
           "grade": grade,
@@ -41,8 +42,9 @@ class CourseService {
   }
 
   static Future<List<PlanCourseDetail>> getPlanCourseDetail(
+      Dio dio,
       String id, String courseid) async {
-    final resp = await AppNetwork.get().bkjwDio
+    final resp = await dio
         .get("student/GetPlanCno", queryParameters: {
       "id": id,
       "courseid": courseid,
@@ -52,15 +54,16 @@ class CourseService {
     return data.data;
   }
 
-  static Future<String> selectPage() async {
+  static Future<String> selectPage(Dio dio) async {
   //   Student/StuSct
-    final resp = await AppNetwork.get().bkjwDio.get("Student/StuSct");
+    final resp = await dio.get("Student/StuSct");
     return resp.data;
   }
 
   static Future<CommonResponse> select(
+      Dio dio,
       PlanCourseDetail planCourseDetail) async {
-    final resp = await AppNetwork.get().bkjwDio.post("student/SctSave",
+    final resp = await dio.post("student/SctSave",
         data: planCourseDetail.toJson(),
         options: Options(contentType: AppNetwork.typeUrlEncode));
     final data = CommonResponse.fromJson(resp.data);
@@ -68,8 +71,9 @@ class CourseService {
   }
 
   static Future<CommonResponse> unselect(
+      Dio dio,
       PlanCourseDetail planCourseDetail) async {
-    final resp = await AppNetwork.get().bkjwDio.post("student/UnSct",
+    final resp = await dio.post("student/UnSct",
         data: planCourseDetail.toJson(),
         options: Options(contentType: AppNetwork.typeUrlEncode));
     final data = CommonResponse.fromJson(resp.data);

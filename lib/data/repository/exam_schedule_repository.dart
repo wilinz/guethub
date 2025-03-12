@@ -1,19 +1,25 @@
+import 'package:dio/dio.dart';
 import 'package:guethub/data/database/database.dart';
 import 'package:guethub/data/model/exam_schedule/exam_schedule.dart';
 import 'package:guethub/data/model/exam_scheduling/exam_schedule.dart' as old;
+import 'package:guethub/data/network.dart';
 import 'package:guethub/data/repository/common.dart';
 import 'package:guethub/data/repository/user.dart';
 import 'package:guethub/data/service/exam_schedule.dart';
 
 class ExamScheduleRepository {
+  Future<Dio> get oldDio => AppNetwork.get().bkjwDio;
+
+  Future<Dio> get dio => AppNetwork.get().bkjwTestDio;
+
   @Deprecated("Old system")
   Future<old.ExamScheduleResponse> getExamSchedule({
     String term = "",
     int page = 1,
     int start = 0,
     int limit = 100,
-  }) =>
-      ExamScheduleService.getExamSchedule(
+  }) async =>
+      ExamScheduleService.getExamSchedule(await oldDio,
           term: term, page: page, start: start, limit: limit);
 
   Map<String, List<ExamSchedule>> cache = {};
@@ -25,13 +31,14 @@ class ExamScheduleRepository {
     final cacheKey = "cache_exam_schedule_${user.username}";
     if (!isFlush) {
       final cacheData = cache[cacheKey];
-      if(cacheData != null && cacheData.isNotEmpty) return cacheData;
+      if (cacheData != null && cacheData.isNotEmpty) return cacheData;
       final db = await getDatabase();
       final dbData = await db.examScheduleDao.getAllByUsername(user.username);
       if (dbData.isNotEmpty) return dbData;
     }
 
-    var data = await ExamScheduleService.getExamScheduleNew(studentId: user.newSystemStudentId!);
+    var data = await ExamScheduleService.getExamScheduleNew(await dio,
+        studentId: user.newSystemStudentId!);
     data = data.map((e) => e..username = user.username).toList();
     cache[cacheKey] = data;
     final db = await getDatabase();

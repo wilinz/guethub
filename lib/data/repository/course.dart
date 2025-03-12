@@ -22,6 +22,10 @@ import '../model/common/common_response.dart';
 import '../service/course.dart';
 
 class CourseRepository {
+  Future<Dio> get oldDio => AppNetwork.get().bkjwDio;
+
+  Future<Dio> get dio => AppNetwork.get().bkjwTestDio;
+
   final _onDatabaseChangeEvent = BehaviorSubject();
 
   ValueStream get onDatabaseChangeEvent => _onDatabaseChangeEvent.stream;
@@ -63,12 +67,12 @@ class CourseRepository {
 
   @Deprecated('Old system')
   Future<CommonResponse> select(PlanCourseDetail planCourseDetail) async {
-    return CourseService.select(planCourseDetail);
+    return CourseService.select(await oldDio, planCourseDetail);
   }
 
   @Deprecated('Old system')
   Future<CommonResponse> unselect(PlanCourseDetail planCourseDetail) async {
-    return CourseService.unselect(planCourseDetail);
+    return CourseService.unselect(await oldDio, planCourseDetail);
   }
 
   @Deprecated('Old system')
@@ -103,7 +107,7 @@ class CourseRepository {
     List<Term> termData;
     logger.d("获取学期列表: ${user}");
     if (user?.isUpgradedUndergrad == true) {
-      termData = (await TermService.getSystem2TermList()).map(
+      termData = (await TermService.getSystem2TermList(await oldDio)).map(
         (e) {
           e.startDate = getRealStartDate(e.startDate);
           e.endDate = getRealStartDate(e.endDate);
@@ -135,12 +139,12 @@ class CourseRepository {
   }
 
   @Deprecated('Old system')
-  Future<List<OldCourse>> getCourseList(String term) =>
-      CourseService.getCourseList(term);
+  Future<List<OldCourse>> getCourseList(String term) async =>
+      CourseService.getCourseList(await oldDio, term);
 
   @Deprecated('Old system')
   Future<List<CourseLab>> getCourseLabList(String term) async {
-    return CourseService.getCourseLabList(term);
+    return CourseService.getCourseLabList(await oldDio, term);
   }
 
   @Deprecated('Old system')
@@ -150,14 +154,14 @@ class CourseRepository {
     String dptno,
     String spno,
   ) async {
-    return CourseService.getPlan(term, grade, dptno, spno)
+    return CourseService.getPlan(await oldDio, term, grade, dptno, spno)
         .then((value) => value..sort((a, b) => a.tname.compareTo(b.tname)));
   }
 
   @Deprecated('Old system')
   Future<List<PlanCourseDetail>> getPlanCourseDetail(
       String id, String courseid) async {
-    return CourseService.getPlanCourseDetail(id, courseid);
+    return CourseService.getPlanCourseDetail(await oldDio, id, courseid);
   }
 
   Map<String, List<SemesterSchedule>> _semesterScheduleCache = {};
@@ -277,7 +281,7 @@ class CourseRepository {
       if (semesters.isNotEmpty) return sortSemesters(semesters);
     }
     final (semesterList, current) =
-        await TermService.getSemesters(AppNetwork.get().bkjwTestDio);
+        await TermService.getSemesters(await AppNetwork.get().bkjwTestDio);
     semesters = semesterList.map((e) {
       e.startDate = getRealStartDate(e.startDate);
       e.endDate = getRealStartDate(e.endDate);
@@ -289,7 +293,7 @@ class CourseRepository {
   }
 
   Future<void> syncChangeToMemory() async {
-    for (final k in _semesterScheduleNewCache.keys){
+    for (final k in _semesterScheduleNewCache.keys) {
       final keySpilt = k.split("_");
       final username = keySpilt[1];
       final semester = keySpilt[2];
@@ -297,7 +301,7 @@ class CourseRepository {
           .getAllByTermAndUsername(semester, username));
       _semesterScheduleNewCache[k] = dbData;
     }
-    for (final k in _semesterScheduleCache.keys){
+    for (final k in _semesterScheduleCache.keys) {
       final keySpilt = k.split("_");
       final username = keySpilt[1];
       final term = keySpilt[2].replaceAll("^", "_");
@@ -331,7 +335,7 @@ class CourseRepository {
     // final dbCache = await db.semesterScheduleDao.getAll();
     // if (dbCache.isNotEmpty) return dbCache;
     final responses = await NewCourseService.getPrintData(
-        dio: AppNetwork.get().bkjwTestDio, semesterId: semester.id);
+        dio: await AppNetwork.get().bkjwTestDio, semesterId: semester.id);
 
     var semesterSchedule =
         generateSemesterScheduleNew(responses, user.username, semester);

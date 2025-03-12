@@ -44,15 +44,15 @@ Map<String, dynamic>? extractCurrentSemester(String jsCode) {
 
 class TermService {
   @Deprecated("Old system")
-  static Future<List<Term>> getTermList() async {
-    final resp = await AppNetwork.get().bkjwDio.get("comm/getlabarrangeterm");
+  static Future<List<Term>> getTermList(Dio dio) async {
+    final resp = await dio.get("comm/getlabarrangeterm");
     final respData = TermResponse.fromJson(resp.data);
     return respData.data;
   }
 
-  static Future<List<Term>> getSystem2TermList() async {
+  static Future<List<Term>> getSystem2TermList(Dio dio) async {
     https: //bkjwsrv.guet.edu.cn/Comm/GetTerm?_dc=1725807886294&page=1&start=0&limit=25
-    final resp = await AppNetwork.get().bkjwDio.get("Comm/GetTerm",
+    final resp = await dio.get("Comm/GetTerm",
         queryParameters: {"_dc": DateTime.timestamp().millisecondsSinceEpoch});
     final respData = TermResponse.fromJson(resp.data);
     return respData.data..map((e) => e..systemId = 2).toList();

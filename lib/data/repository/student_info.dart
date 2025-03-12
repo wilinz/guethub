@@ -1,6 +1,7 @@
 import 'package:guethub/data/database/database.dart';
 import 'package:guethub/data/model/student/student_info.dart';
 import 'package:guethub/data/model/user/user.dart';
+import 'package:guethub/data/network.dart';
 import 'package:guethub/data/repository/common.dart';
 import 'package:guethub/data/repository/user.dart';
 import 'package:guethub/data/service/student_info.dart';
@@ -21,9 +22,9 @@ class StudentInfoRepository {
 
     StudentInfo userInfo;
     if (user.isOnlyUseOldSystem == true) {
-      userInfo = await StudentInfoService.get();
+      userInfo = await StudentInfoService.get(await AppNetwork.get().bkjwDio);
     } else {
-      userInfo = await StudentInfoService.getNewInfo();
+      userInfo = await StudentInfoService.getNewInfo(await AppNetwork.get().bkjwTestDio);
     }
     await updateUserRealName(user, db, userInfo);
     await db.studentInfoDao.insertOrUpdate(userInfo);

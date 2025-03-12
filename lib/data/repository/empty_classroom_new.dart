@@ -17,26 +17,26 @@ import 'package:html/parser.dart';
 import 'package:json5/json5.dart';
 
 class EmptyClassroomNewRepository {
-  Dio get dio => AppNetwork.get().bkjwTestDio;
+  Future<Dio> get dio => AppNetwork.get().bkjwTestDio;
 
   Future<EmptyClassroomQueryResult> queryEmptyClassroom(
-          {required EmptyClassroomQueryBody body}) =>
-      EmptyClassroomNewService.queryEmptyClassroom(dio, body: body);
+          {required EmptyClassroomQueryBody body}) async =>
+      EmptyClassroomNewService.queryEmptyClassroom(await dio, body: body);
 
   Future<List<EmptyClassroomRoom>> getEmptyClassroomRooms(
           {required int buildingId,
           bool hasDataPermission = false,
           bool hasUsableDepartPermission = false}) async =>
-      EmptyClassroomNewService.getEmptyClassroomRooms(dio,
+      EmptyClassroomNewService.getEmptyClassroomRooms(await dio,
           buildingId: buildingId);
 
   Future<List<EmptyClassroomBuilding>> getEmptyClassroomBuildings(
           {required int campusId, bool hasDataPermission = false}) async =>
-      EmptyClassroomNewService.getEmptyClassroomBuildings(dio,
+      EmptyClassroomNewService.getEmptyClassroomBuildings(await dio,
           campusId: campusId);
 
   Future<EmptyClassroomConfig> getEmptyClassroomConfig() async =>
-      EmptyClassroomNewService.getEmptyClassroomConfig(dio);
+      EmptyClassroomNewService.getEmptyClassroomConfig(await dio);
 
   EmptyClassroomNewRepository._create();
 

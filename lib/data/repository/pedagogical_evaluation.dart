@@ -1,20 +1,25 @@
+import 'package:dio/dio.dart';
 import 'package:guethub/data/model/common/common_response.dart';
 import 'package:guethub/data/model/pedagogical_evaluation/pedagogical_evaluation_data.dart';
 import 'package:guethub/data/model/pedagogical_evaluation/pedagogical_evaluation_questions_response.dart';
 import 'package:guethub/data/model/pedagogical_evaluation/pedagogical_evaluation_response.dart';
 import 'package:guethub/data/service/pedagogical_evaluation.dart';
 
+import '../network.dart';
+
 class PedagogicalEvaluationRepository {
+  Future<Dio> get dio => AppNetwork.get().bkjwDio;
 
   @Deprecated("Old system")
   Future<List<PedagogicalEvaluation>> getList(String term) async {
-    return PedagogicalEvaluationService.get(term);
+    return PedagogicalEvaluationService.get(await dio, term);
   }
 
   @Deprecated("Old system")
   Future<List<PedagogicalEvaluationQuestion>> getQuestions(
       String term, String courseno, String teacherno) async {
-    return PedagogicalEvaluationService.getQuestions(term, courseno, teacherno);
+    return PedagogicalEvaluationService.getQuestions(
+        await dio, term, courseno, teacherno);
   }
 
   @Deprecated("Old system")
@@ -25,7 +30,7 @@ class PedagogicalEvaluationRepository {
       required String teacherno,
       required int lb,
       required List<PedagogicalEvaluationQuestion> questions}) async {
-    return PedagogicalEvaluationService.submitQuestions(
+    return PedagogicalEvaluationService.submitQuestions(await dio,
         term: term,
         courseid: courseid,
         courseno: courseno,
@@ -40,7 +45,7 @@ class PedagogicalEvaluationRepository {
       required String comment,
       required num score,
       required bool isSaveOnly}) async {
-    return PedagogicalEvaluationService.submit(
+    return PedagogicalEvaluationService.submit(await dio,
         data: data, comment: comment, score: score, isSaveOnly: isSaveOnly);
   }
 
@@ -49,7 +54,7 @@ class PedagogicalEvaluationRepository {
       {required String term,
       required String courseno,
       required String teacherno}) async {
-    return PedagogicalEvaluationService.getCurrent(
+    return PedagogicalEvaluationService.getCurrent(await dio,
         term: term, courseno: courseno, teacherno: teacherno);
   }
 

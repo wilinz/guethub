@@ -132,7 +132,7 @@ class AppNetwork {
           retryDelays: [Duration(milliseconds: 100)])
     ]);
     // _proxy(dio);
-    setupGuetProxy(dio);
+    // setupGuetProxy(dio);
     setDioLogger(dio);
     return dio;
   }
@@ -150,7 +150,7 @@ class AppNetwork {
       BaseUrlInterceptor(),
       // AppNetwork.vpnCookieInterceptor(cookieJar),
       CookieManager(cookieJar),
-      GuetLoginInterceptor(cookieJar),
+      GuetLoginInterceptor(dio),
       RedirectInterceptor(dio),
       BaseUrlInterceptor(),
       RefererInterceptor(),
@@ -165,7 +165,7 @@ class AppNetwork {
           retryDelays: [Duration(milliseconds: 100)])
     ]);
     // _proxy(dio);
-    setupGuetProxy(dio);
+    // setupGuetProxy(dio);
     setDioLogger(dio);
     return dio;
   }
@@ -185,7 +185,7 @@ class AppNetwork {
       CookieManager(cookieJar),
       TeachingEvaluationAuthInterceptor(dio),
       CourseSelectAuthInterceptor(dio),
-      GuetLoginInterceptor(cookieJar),
+      GuetLoginInterceptor(dio),
       RedirectInterceptor(dio),
       RefererInterceptor(),
       ExperimentSystemAuthInterceptor(dio),
@@ -200,7 +200,7 @@ class AppNetwork {
           retryDelays: [Duration(milliseconds: 100)])
     ]);
     // _proxy(dio);
-    setupGuetProxy(dio);
+    // setupGuetProxy(dio);
     setDioLogger(dio);
     return dio;
   }
@@ -255,6 +255,20 @@ class AppNetwork {
   }
 
   static void setupGuetProxy(Dio dio) {
+    // (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+    //   logger.d("on create http client");
+    //   final client = HttpClient();
+    //   SocksTCPClient.assignToHttpClient(client, [
+    //     ProxySettings('www.wilinz.com', 10888,
+    //         username: utf8.decode(base64Decode('cm9vdA==')),
+    //         password: utf8.decode(
+    //             base64Decode('NDRjODA4NTUwN2EwNDIwNDk2MmE4NTUxMDc2MDNhNmI='))),
+    //   ]);
+    //   return client;
+    // };
+  }
+
+  static Dio setupGuetProxy1(Dio dio) {
     (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
       logger.d("on create http client");
       final client = HttpClient();
@@ -266,6 +280,7 @@ class AppNetwork {
       ]);
       return client;
     };
+    return dio;
   }
 
   static final loggedDioList = <Dio>[];
@@ -298,9 +313,32 @@ class AppNetwork {
   // }
 
   late Dio _bkjwDio;
-  Dio get bkjwDio => _bkjwDio;
-  late Dio casDio;
-  late Dio bkjwTestDio;
+  late Dio _bkjwDioProxy;
+
+  late Dio _bkjwTestDio;
+  late Dio _bkjwTestDioProxy;
+
+  late Dio _casDio;
+  late Dio _casDioProxy;
+
+  Future<Dio> get bkjwDio async {
+    final isCampusNetwork =
+        await NetworkDetectionRepository.get().isCampusNetwork;
+    return isCampusNetwork == true ? _bkjwDio : _bkjwDioProxy;
+  }
+
+  Future<Dio> get bkjwTestDio async {
+    final isCampusNetwork =
+        await NetworkDetectionRepository.get().isCampusNetwork;
+    return isCampusNetwork == true ? _bkjwTestDio : _bkjwTestDioProxy;
+  }
+
+  Future<Dio> get casDio async {
+    final isCampusNetwork =
+        await NetworkDetectionRepository.get().isCampusNetwork;
+    return isCampusNetwork == true ? _casDio : _casDioProxy;
+  }
+
   late Dio noProxyDio;
   late Dio appDio;
 
@@ -354,8 +392,14 @@ class AppNetwork {
       //   ConnectionManager(idleTimeout: Duration(seconds: 10)),
       //   fallbackAdapter: HttpClientAdapter(),
       // );
-      instance.casDio = setupCasDio(newDio(), instance.cookieJar);
-      instance.bkjwTestDio = setupBkjwTestDio(newDio(), instance.cookieJar);
+      instance._casDio = setupCasDio(newDio(), instance.cookieJar);
+      instance._casDioProxy = setupGuetProxy1(
+          instance._casDio.clone(httpClientAdapter: HttpClientAdapter()));
+
+      instance._bkjwTestDio = setupBkjwTestDio(newDio(), instance.cookieJar);
+      instance._bkjwTestDioProxy = setupGuetProxy1(
+          instance._bkjwTestDio.clone(httpClientAdapter: HttpClientAdapter()));
+
       instance.noProxyDio = setupNoProxyDio(newDio(), instance.cookieJar);
       instance.appDio =
           setupAppDio(newDio(), !isTest ? getAppCookieJar() : CookieJar());
@@ -363,6 +407,8 @@ class AppNetwork {
       final dio2 = newDio();
       instance._bkjwDio = setupBkjwDio(dio2, instance.cookieJar);
       instance._bkjwDio.interceptors.add(RedirectInterceptor(dio2));
+      instance._bkjwDioProxy = setupGuetProxy1(
+          instance._bkjwDio.clone(httpClientAdapter: HttpClientAdapter()));
       _instances[username] = instance;
     }
     return _instances[username]!;
@@ -457,9 +503,7 @@ class UnauthorizedException implements Exception {
 class GuetLoginInterceptor extends Interceptor {
   static const String allowCheckingLogin = "allowCheckingLogin";
 
-  final CookieJar cookieJar;
-
-  final Dio dio = Dio();
+  final Dio dio;
 
   // ..httpClientAdapter = Http2Adapter(
   //   ConnectionManager(idleTimeout: Duration(seconds: 10)),
@@ -468,30 +512,7 @@ class GuetLoginInterceptor extends Interceptor {
 
   static Completer<void>? _loginCompleter;
 
-  GuetLoginInterceptor(this.cookieJar) {
-    dio.options = BaseOptions(
-      followRedirects: false,
-      validateStatus: (int? status) => status != null,
-    );
-    dio.interceptors.addAll([
-      BaseUrlInterceptor(),
-      // AppNetwork.vpnCookieInterceptor(cookieJar),
-      CookieManager(cookieJar),
-      RedirectInterceptor(dio),
-      RefererInterceptor(),
-      RetryInterceptor(
-          dio: dio,
-          logPrint: (msg) {
-            logger.i(msg);
-          },
-          retries: 2,
-          toNoInternetPageNavigator: () async {},
-          retryDelays: [Duration(milliseconds: 100)])
-    ]);
-    // _proxy(dio);
-    AppNetwork.setupGuetProxy(dio);
-    AppNetwork.setDioLogger(dio);
-  }
+  GuetLoginInterceptor(Dio dio) : this.dio = dio.clone();
 
   final bkjw404Host = [
     "https://bkjwsrv.guet.edu.cn",

@@ -1,16 +1,11 @@
 import 'package:dart_extensions/dart_extensions.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:guethub/data/model/empty_classroom/empty_classroom.dart';
 import 'package:guethub/data/model/empty_classroom/empty_classroom_buildings/empty_classroom_buildings.dart';
 import 'package:guethub/data/model/empty_classroom/empty_classroom_config/empty_classroom_config.dart';
 import 'package:guethub/data/model/empty_classroom/empty_classroom_query_body/empty_classroom_query_body.dart';
 import 'package:guethub/data/model/empty_classroom/empty_classroom_rooms/empty_classroom_rooms.dart';
 import 'package:guethub/data/model/empty_classroom/empty_classroom_query_result/empty_classroom_query_result.dart';
 import 'package:guethub/data/repository/empty_classroom_new.dart';
-import 'package:guethub/data/service/empty_classroom.dart';
-import 'package:intl/intl.dart';
-import 'package:kt_dart/kt.dart';
 
 class EmptyClassroomNewController extends GetxController {
   final config = Rxn<EmptyClassroomConfig>();

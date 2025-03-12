@@ -11,7 +11,7 @@ class TeachingEvaluationRepository {
       String orderBy = "",
       bool evaluated = false}) async {
     final resp = await TeachingEvaluationService.getTeachingEvaluationResponse(
-        AppNetwork.get().bkjwTestDio,
+        await AppNetwork.get().bkjwTestDio,
         semesterId: semesterId,
         startPage: startPage,
         endPage: endPage,
@@ -25,7 +25,7 @@ class TeachingEvaluationRepository {
           {required String evaluationQuestionnaireId}) async {
     final resp =
         await TeachingEvaluationService.getTeachingEvaluationContentResponse(
-            AppNetwork.get().bkjwTestDio,
+            await AppNetwork.get().bkjwTestDio,
             evaluationQuestionnaireId: evaluationQuestionnaireId);
     return resp;
   }

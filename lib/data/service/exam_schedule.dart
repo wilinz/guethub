@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dart_extensions/dart_extensions.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:guethub/data/model/exam_schedule/exam_schedule.dart';
 import 'package:guethub/data/model/exam_scheduling/exam_schedule.dart' as old;
@@ -14,14 +15,14 @@ import 'package:html/parser.dart' as html_parser;
 
 class ExamScheduleService {
   @Deprecated("Old system")
-  static Future<old.ExamScheduleResponse> getExamSchedule({
+  static Future<old.ExamScheduleResponse> getExamSchedule(
+    Dio dio, {
     String term = "",
     int page = 1,
     int start = 0,
     int limit = 100,
   }) async {
-    final resp =
-        await AppNetwork.get().bkjwDio.get("student/getexamap", queryParameters: {
+    final resp = await dio.get("student/getexamap", queryParameters: {
       "_dc": DateTime.timestamp().millisecondsSinceEpoch,
       "term": term,
       "page": page,
@@ -33,12 +34,14 @@ class ExamScheduleService {
 
   // https://bkjwtest.guet.edu.cn/student/for-std/exam-arrange
   // 302 to https://bkjwtest.guet.edu.cn/student/for-std/exam-arrange/info/104676
-  static Future<List<ExamSchedule>> getExamScheduleNew({required int studentId}) async {
+  static Future<List<ExamSchedule>> getExamScheduleNew(Dio dio,
+      {required int studentId}) async {
     final resp =
-        await AppNetwork.get().bkjwTestDio.get("student/for-std/exam-arrange/info/${studentId}");
+        await dio.get("student/for-std/exam-arrange/info/${studentId}");
     final data = await compute<String, List<Map<String, dynamic>>>(
         _parseSchedules, resp.data);
-    return examScheduleListFormJson(data);;
+    return examScheduleListFormJson(data);
+    ;
   }
 }
 

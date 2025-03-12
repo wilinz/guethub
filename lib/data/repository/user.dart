@@ -1,5 +1,6 @@
 import 'package:guethub/data/database/database.dart';
 import 'package:guethub/data/model/user/user.dart';
+import 'package:guethub/data/network.dart';
 import 'package:guethub/data/repository/common.dart';
 import 'package:guethub/data/repository/login.dart';
 import 'package:guethub/data/service/student_info.dart';
@@ -43,7 +44,7 @@ class UserRepository {
     if (user.newSystemStudentId != null) {
       return user.newSystemStudentId!;
     }
-    final id = await StudentInfoService.getNewSystemStudentId();
+    final id = await StudentInfoService.getNewSystemStudentId(await AppNetwork.get().bkjwTestDio);
     user.newSystemStudentId = id;
     db.userDao.updateUser(user);
     return id;

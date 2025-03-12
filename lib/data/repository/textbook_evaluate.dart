@@ -13,19 +13,19 @@ import 'package:guethub/data/service/textbook_evaluate.dart';
 import 'package:guethub/exceptions/exceptions.dart';
 
 class TextbookEvaluateRepository {
-  Dio get dio => AppNetwork.get().bkjwTestDio;
+  Future<Dio> get dio => AppNetwork.get().bkjwTestDio;
 
   bool isTestData = false;
 
   Future<TextbookEvaluateSaveResult> saveTextbookEvaluate(
           {required TextbookEvaluateSave data}) async =>
-      TextbookEvaluateService.saveTextbookEvaluate(dio, data: data);
+      TextbookEvaluateService.saveTextbookEvaluate(await dio, data: data);
 
   Future<TextbookEvaluateResult> getTextbookEvaluateResult({
     required int semesterId,
   }) async {
     final studentId = await getNewSystemStudentId();
-    return TextbookEvaluateService.getTextbookEvaluateResult(dio,
+    return TextbookEvaluateService.getTextbookEvaluateResult(await dio,
         studentId: studentId, semesterId: semesterId);
   }
 
@@ -44,7 +44,7 @@ class TextbookEvaluateRepository {
     return isTestData
         ? Future.value(TextbookEvaluateInfo.fromJson(
             jsonDecode(testTextbookEvaluateInfoData)))
-        : TextbookEvaluateService.getTextbookEvaluateInfo(dio,
+        : TextbookEvaluateService.getTextbookEvaluateInfo(await dio,
             studentId: studentId, semesterId: semesterId);
   }
 
@@ -55,7 +55,7 @@ class TextbookEvaluateRepository {
       required int textbookId,
       String? redirectUrl}) async {
     final studentId = await getNewSystemStudentId();
-    return TextbookEvaluateService.getTextbookEvaluateDetail(dio,
+    return TextbookEvaluateService.getTextbookEvaluateDetail(await dio,
         studentId: studentId,
         semesterId: semesterId,
         batchId: batchId,

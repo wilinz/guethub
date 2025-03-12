@@ -9,14 +9,14 @@ import 'package:guethub/data/redirect_interceptor.dart';
 import 'package:guethub/data/service/experiment.dart';
 
 class ExperimentRepository {
-  Dio get dio => AppNetwork.get().bkjwTestDio;
+  Future<Dio> get dio => AppNetwork.get().bkjwTestDio;
 
   /// 获取实验课程列表
   ///
   /// [teacherCalendarId] 示例: "1712296043783131138"
   Future<ExperimentCoursesResponse> getExperimentCourses(
           {required String teacherCalendarId}) async =>
-      ExperimentService.getExperimentCourses(dio,
+      ExperimentService.getExperimentCourses(await dio,
           teacherCalendarId: teacherCalendarId);
 
   /// 获取实验项目列表
@@ -25,7 +25,7 @@ class ExperimentRepository {
   Future<List<ExperimentItems>> getExperimentItems(
       {required String taskId}) async {
     final resp =
-        await ExperimentService.getExperimentItems(dio, taskId: taskId);
+        await ExperimentService.getExperimentItems(await dio, taskId: taskId);
 
     for (final e in resp.result) {
       for (final item in e.list) {
@@ -43,7 +43,7 @@ class ExperimentRepository {
   /// [taskId] 示例: "sync252750"
   Future<ExperimentBatchResponse> getExperimentBatch(
           {required String subjectId, required String taskId}) async =>
-      ExperimentService.getExperimentBatch(dio,
+      ExperimentService.getExperimentBatch(await dio,
           subjectId: subjectId, taskId: taskId);
 
   /// 选课
@@ -57,7 +57,7 @@ class ExperimentRepository {
           required int selectWey,
           required String taskId,
           required String stuId}) async =>
-      ExperimentService.selectExperimentCourse(dio,
+      ExperimentService.selectExperimentCourse(await dio,
           itemIds: itemIds, selectWey: selectWey, taskId: taskId, stuId: stuId);
 
   /// 退课
@@ -69,11 +69,11 @@ class ExperimentRepository {
           {required String stuId,
           required String subjectId,
           required String taskId}) async =>
-      ExperimentService.dropExperimentCourse(dio,
+      ExperimentService.dropExperimentCourse(await dio,
           stuId: stuId, subjectId: subjectId, taskId: taskId);
 
-  Future<TeacherCalendarResponse> getTeacherCalendar() =>
-      ExperimentService.getTeacherCalendar(dio);
+  Future<TeacherCalendarResponse> getTeacherCalendar() async =>
+      ExperimentService.getTeacherCalendar(await dio);
 
   ExperimentRepository._create();
 
