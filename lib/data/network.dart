@@ -107,6 +107,7 @@ class AppNetwork {
   }
 
   static setupCasDio(Dio dio, CookieJar cookieJar) {
+    final interceptorsDio = () async => AppNetwork.get().casDio;
     final url = "https://cas.guet.edu.cn/";
     dio.options = BaseOptions(
         baseUrl: url,
@@ -119,7 +120,7 @@ class AppNetwork {
     dio.interceptors.addAll([
       BaseUrlInterceptor(),
       CookieManager(cookieJar),
-      RedirectInterceptor(dio),
+      RedirectInterceptor(interceptorsDio),
       RefererInterceptor(),
       DioExceptionInterceptor(),
       RetryInterceptor(
@@ -138,6 +139,7 @@ class AppNetwork {
   }
 
   static Dio setupBkjwDio(Dio dio, CookieJar cookieJar) {
+    final interceptorsDio = () async => AppNetwork.get().bkjwDio;
     dio.options = BaseOptions(
         baseUrl: baseUrl,
         headers: {"User-Agent": userAgent},
@@ -150,8 +152,8 @@ class AppNetwork {
       BaseUrlInterceptor(),
       // AppNetwork.vpnCookieInterceptor(cookieJar),
       CookieManager(cookieJar),
-      GuetLoginInterceptor(dio),
-      RedirectInterceptor(dio),
+      GuetLoginInterceptor(interceptorsDio),
+      RedirectInterceptor(interceptorsDio),
       BaseUrlInterceptor(),
       RefererInterceptor(),
       DioExceptionInterceptor(),
@@ -171,6 +173,7 @@ class AppNetwork {
   }
 
   static setupBkjwTestDio(Dio dio, CookieJar cookieJar) {
+    final interceptorsDio = () async => AppNetwork.get().bkjwTestDio;
     final url = "https://bkjwtest.guet.edu.cn/";
     dio.options = BaseOptions(
         baseUrl: url,
@@ -184,11 +187,11 @@ class AppNetwork {
       BaseUrlInterceptor(),
       CookieManager(cookieJar),
       TeachingEvaluationAuthInterceptor(dio),
-      CourseSelectAuthInterceptor(dio),
-      GuetLoginInterceptor(dio),
-      RedirectInterceptor(dio),
+      CourseSelectAuthInterceptor(interceptorsDio),
+      GuetLoginInterceptor(interceptorsDio),
+      RedirectInterceptor(interceptorsDio),
       RefererInterceptor(),
-      ExperimentSystemAuthInterceptor(dio),
+      ExperimentSystemAuthInterceptor(interceptorsDio),
       DioExceptionInterceptor(),
       RetryInterceptor(
           dio: dio,
@@ -214,7 +217,7 @@ class AppNetwork {
     dio.interceptors.addAll([
       CookieManager(cookieJar),
       JsonpInterceptor(),
-      RedirectInterceptor(dio)
+      RedirectInterceptor(() async => dio)
     ]);
     // _proxy(dio);
     setDioLogger(dio);
@@ -247,8 +250,8 @@ class AppNetwork {
       followRedirects: false,
       validateStatus: (int? status) => status != null,
     );
-    dio.interceptors
-        .addAll([CookieManager(cookieJar), RedirectInterceptor(dio)]);
+    dio.interceptors.addAll(
+        [CookieManager(cookieJar), RedirectInterceptor(() async => dio)]);
     // _proxy(dio);
     setDioLogger(dio);
     return dio;
@@ -406,7 +409,6 @@ class AppNetwork {
 
       final dio2 = newDio();
       instance._bkjwDio = setupBkjwDio(dio2, instance.cookieJar);
-      instance._bkjwDio.interceptors.add(RedirectInterceptor(dio2));
       instance._bkjwDioProxy = setupGuetProxy1(
           instance._bkjwDio.clone(httpClientAdapter: HttpClientAdapter()));
       _instances[username] = instance;
@@ -503,7 +505,7 @@ class UnauthorizedException implements Exception {
 class GuetLoginInterceptor extends Interceptor {
   static const String allowCheckingLogin = "allowCheckingLogin";
 
-  final Dio dio;
+  final Future<Dio> Function() dio;
 
   // ..httpClientAdapter = Http2Adapter(
   //   ConnectionManager(idleTimeout: Duration(seconds: 10)),
@@ -512,7 +514,7 @@ class GuetLoginInterceptor extends Interceptor {
 
   static Completer<void>? _loginCompleter;
 
-  GuetLoginInterceptor(Dio dio) : this.dio = dio.clone();
+  GuetLoginInterceptor(this.dio);
 
   final bkjw404Host = [
     "https://bkjwsrv.guet.edu.cn",
@@ -620,7 +622,7 @@ class GuetLoginInterceptor extends Interceptor {
       ..removeWhere((key, value) => key.toLowerCase() == "cookie");
     logger.d("新请求头: $newHeader");
     final newExtra = requestOptions.extra..[allowCheckingLogin] = false;
-    final newResp = await dio
+    final newResp = await (await dio())
         .fetch(requestOptions.copyWith(headers: newHeader, extra: newExtra));
     logger.d("新响应");
     handler.next(newResp);
@@ -761,7 +763,7 @@ class RefererInterceptor extends Interceptor {
 }
 
 class ExperimentSystemAuthInterceptor extends Interceptor {
-  final Dio dio;
+  final Future<Dio> Function() dio;
 
   ExperimentSystemAuthInterceptor(this.dio);
 
@@ -785,7 +787,7 @@ class ExperimentSystemAuthInterceptor extends Interceptor {
     var token = user.experimentSystemToken;
 
     renewToken() async {
-      token = await ExperimentService.getToken(dio);
+      token = await ExperimentService.getToken(await dio());
       if (token == null) {
         handler.next(options);
         return;
@@ -810,7 +812,7 @@ class ExperimentSystemAuthInterceptor extends Interceptor {
 }
 
 class CourseSelectAuthInterceptor extends Interceptor {
-  final Dio dio;
+  final Future<Dio> Function() dio;
 
   CourseSelectAuthInterceptor(this.dio);
 
@@ -832,7 +834,7 @@ class CourseSelectAuthInterceptor extends Interceptor {
     var token = user.courseSelectToken;
 
     renewToken() async {
-      token = await CourseSelectService.getToken(dio);
+      token = await CourseSelectService.getToken(await dio());
       if (token == null) {
         handler.next(options);
         return;

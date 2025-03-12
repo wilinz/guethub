@@ -5,14 +5,14 @@ typedef RedirectCallback = bool Function(
     Response response, ResponseInterceptorHandler handler);
 
 class RedirectInterceptor extends Interceptor {
-  final Dio _dio;
+  final Future<Dio> Function() dio;
   RedirectCallback? _redirectCallback;
   static const String followRedirects = "followRedirects";
   static const String rawUri = "rawUri";
   static const String rawRequestOption = "rawRequestOption";
   static const String redirectCount = "redirectCount";
 
-  RedirectInterceptor(this._dio, {RedirectCallback? onRedirect})
+  RedirectInterceptor(this.dio, {RedirectCallback? onRedirect})
       : _redirectCallback = onRedirect;
 
   @override
@@ -73,7 +73,7 @@ class RedirectInterceptor extends Interceptor {
           listFormat: requestOptions.listFormat,
         );
 
-        final redirectResponse = await _dio.getUri(
+        final redirectResponse = await (await dio()).getUri(
           newUri,
           options: option,
         );
