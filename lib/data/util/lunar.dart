@@ -192,6 +192,12 @@ List<HolidayInfo> _getHolidayInfoWithAdjustedMapping(
 
 List<HolidayInfo> getYearHolidays(int year) {
   final holidaysYear = HolidayUtil.getHolidaysByYear(year); // 获取2024年的假期列表
+  if(year == 2025) {
+    holidaysYear.add(Holiday("2025-03-29", "广西三月三", false, "2025-03-31"));
+    holidaysYear.add(Holiday("2025-03-30", "广西三月三", false, "2025-03-31"));
+    holidaysYear.add(Holiday("2025-03-31", "广西三月三", false, "2025-03-31"));
+    holidaysYear.add(Holiday("2025-04-01", "广西三月三", false, "2025-03-31"));
+  }
   final nationalDayAndMidAutumnFestival =
       holidaysYear.firstOrNullWhere((e) => e.getName() == "国庆中秋") != null;
 
