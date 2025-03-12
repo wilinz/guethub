@@ -10,7 +10,7 @@ import 'package:guethub/data/util/util.dart';
 
 class StudentInfoService {
   static Future<StudentInfo> get() async {
-    final resp = await AppNetwork.get().dio2.get("student/StuInfo");
+    final resp = await AppNetwork.get().bkjwDio.get("student/StuInfo");
     final respData = StudentInfo.fromJson(resp.data);
     return respData;
   }

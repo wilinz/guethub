@@ -9,7 +9,7 @@ class MajorsService {
       {"property": "dptno", "direction": "ASC"},
       {"property": "spno", "direction": "ASC"}
     ];
-    final resp = await AppNetwork.get().dio2
+    final resp = await AppNetwork.get().bkjwDio
         .get("Comm/GetSpno", queryParameters: {"sort": jsonEncode(sort)});
     final respData = MajorsResponse.fromJson(resp.data);
     return respData.data;

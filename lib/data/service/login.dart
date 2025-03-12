@@ -140,7 +140,7 @@ class LoginService {
     // final resp = await (await AppNetwork.getDio()).get("https://v.guet.edu.cn");
 
     // var resp1 = await loginCas(
-    //     dio: AppNetwork.get().dio2,
+    //     dio: AppNetwork.get().bkjwDio,
     //     username: username,
     //     password: password,
     //     service: "https://v.guet.edu.cn/login?cas_login=true",

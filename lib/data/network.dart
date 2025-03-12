@@ -298,6 +298,7 @@ class AppNetwork {
   // }
 
   late Dio _bkjwDio;
+  Dio get bkjwDio => _bkjwDio;
   late Dio casDio;
   late Dio bkjwTestDio;
   late Dio noProxyDio;
@@ -325,8 +326,6 @@ class AppNetwork {
   factory AppNetwork.get({String? username}) {
     return getInstance(username: username);
   }
-
-  Dio get dio2 => _bkjwDio;
 
   late CookieJar cookieJar;
 

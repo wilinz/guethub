@@ -21,7 +21,7 @@ class ExamScheduleService {
     int limit = 100,
   }) async {
     final resp =
-        await AppNetwork.get().dio2.get("student/getexamap", queryParameters: {
+        await AppNetwork.get().bkjwDio.get("student/getexamap", queryParameters: {
       "_dc": DateTime.timestamp().millisecondsSinceEpoch,
       "term": term,
       "page": page,

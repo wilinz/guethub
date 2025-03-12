@@ -8,7 +8,7 @@ import 'package:guethub/data/network.dart';
 
 class PedagogicalEvaluationService {
   static Future<List<PedagogicalEvaluation>> get(String term) async {
-    final resp = await AppNetwork.get().dio2
+    final resp = await AppNetwork.get().bkjwDio
         .get("student/getpjcno", queryParameters: {"term": term});
     final respData = PedagogicalEvaluationResponse.fromJson(resp.data);
     return respData.data;
@@ -16,7 +16,7 @@ class PedagogicalEvaluationService {
 
   static Future<List<PedagogicalEvaluationQuestion>> getQuestions(
       String term, String courseno, String teacherno) async {
-    final resp = await AppNetwork.get().dio2.get("student/jxpgdata",
+    final resp = await AppNetwork.get().bkjwDio.get("student/jxpgdata",
         queryParameters: {
           "term": term,
           "courseno": courseno,
@@ -38,7 +38,7 @@ class PedagogicalEvaluationService {
             resp, term, courseid, teacherno, courseno, lb))
         .where((e) => e != null)
         .toList();
-    final resp = await AppNetwork.get().dio2.post("student/SaveJxpg",
+    final resp = await AppNetwork.get().bkjwDio.post("student/SaveJxpg",
         queryParameters: {
           "term": term,
           "courseno": courseno,
@@ -56,7 +56,7 @@ class PedagogicalEvaluationService {
       required bool isSaveOnly}) async {
     //  student/SaveJxpgJg
     final path = isSaveOnly ? "student/SaveJxpgJg" : "student/SaveJxpgJg/1";
-    final resp = await AppNetwork.get().dio2.post(path,
+    final resp = await AppNetwork.get().bkjwDio.post(path,
         data: PedagogicalEvaluationData.fromResponse(data, comment, score)
             .toJson(),
         options: Options(contentType: AppNetwork.typeUrlEncode));
@@ -67,7 +67,7 @@ class PedagogicalEvaluationService {
       {required String term,
       required String courseno,
       required String teacherno}) async {
-    final resp = await AppNetwork.get().dio2.post("student/JxpgJg",
+    final resp = await AppNetwork.get().bkjwDio.post("student/JxpgJg",
         data: {
           "term": term,
           "courseno": courseno,

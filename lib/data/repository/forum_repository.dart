@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:guethub/data/model/app/app_version/app_version.dart';
 import 'package:guethub/data/model/app/forum/forum_categories_response/forum_categories_response.dart';
 import 'package:guethub/data/model/app/forum/forum_posts_response/forum_posts_response.dart';
@@ -5,7 +6,7 @@ import 'package:guethub/data/model/common/common_response.dart';
 import 'package:guethub/data/network.dart';
 
 class ForumRepository {
-  final dio = AppNetwork.get().appDio;
+  Dio get dio => AppNetwork.get().appDio;
 
   Future<ForumCategoriesResponse> getCategories() async {
     final response = await dio.get("forum/categories");
