@@ -101,7 +101,7 @@ class WebViewState extends State<WebView> {
       'https://pcportal.guet.edu.cn'
     ];
 
-    await AppNetwork.get().bkjwTestDio.get(widget.args.url);
+    // await AppNetwork.get().bkjwTestDio.get(widget.args.url);
 
     for (final url in urls) {
       final cookies =

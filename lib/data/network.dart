@@ -35,6 +35,7 @@ import 'package:kt_dart/kt.dart';
 import 'package:path/path.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:socks5_proxy/socks_client.dart';
 
 import 'util/user_agent.dart';
 
@@ -66,6 +67,7 @@ class AppNetwork {
   static const String typeUrlEncode = "application/x-www-form-urlencoded";
 
   static String? _userAgent = null;
+
   static String get userAgent => (_userAgent ??= getRandomUserAgent());
 
   // static VpnCookieInterceptor vpnCookieInterceptor(CookieJar cookieJar) =>
@@ -253,16 +255,17 @@ class AppNetwork {
   }
 
   static void setupGuetProxy(Dio dio) {
-    // (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-    //   final client = HttpClient();
-    //   SocksTCPClient.assignToHttpClient(client, [
-    //     ProxySettings('www.wilinz.com', 10888,
-    //         username: utf8.decode(base64Decode('cm9vdA==')),
-    //         password: utf8.decode(
-    //             base64Decode('NDRjODA4NTUwN2EwNDIwNDk2MmE4NTUxMDc2MDNhNmI='))),
-    //   ]);
-    //   return client;
-    // };
+    (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+      logger.d("on create http client");
+      final client = HttpClient();
+      SocksTCPClient.assignToHttpClient(client, [
+        ProxySettings('www.wilinz.com', 10888,
+            username: utf8.decode(base64Decode('cm9vdA==')),
+            password: utf8.decode(
+                base64Decode('NDRjODA4NTUwN2EwNDIwNDk2MmE4NTUxMDc2MDNhNmI='))),
+      ]);
+      return client;
+    };
   }
 
   static final loggedDioList = <Dio>[];
@@ -347,10 +350,11 @@ class AppNetwork {
       // _instance._dio1 = setupDio(Dio(), _instance.cookieJar);
       // _instance._dio1.setFollowRedirects(false);
 
-      Dio newDio() => Dio()
-        ..httpClientAdapter = Http2Adapter(
-          ConnectionManager(idleTimeout: Duration(seconds: 10)),
-        );
+      Dio newDio() => Dio();
+      // ..httpClientAdapter = Http2Adapter(
+      //   ConnectionManager(idleTimeout: Duration(seconds: 10)),
+      //   fallbackAdapter: HttpClientAdapter(),
+      // );
       instance.casDio = setupCasDio(newDio(), instance.cookieJar);
       instance.bkjwTestDio = setupBkjwTestDio(newDio(), instance.cookieJar);
       instance.noProxyDio = setupNoProxyDio(newDio(), instance.cookieJar);
@@ -456,10 +460,12 @@ class GuetLoginInterceptor extends Interceptor {
 
   final CookieJar cookieJar;
 
-  final Dio dio = Dio()
-    ..httpClientAdapter = Http2Adapter(
-      ConnectionManager(idleTimeout: Duration(seconds: 10)),
-    );
+  final Dio dio = Dio();
+
+  // ..httpClientAdapter = Http2Adapter(
+  //   ConnectionManager(idleTimeout: Duration(seconds: 10)),
+  //   fallbackAdapter: HttpClientAdapter(),
+  // );
 
   static Completer<void>? _loginCompleter;
 
@@ -661,7 +667,6 @@ class GuetLoginInterceptor extends Interceptor {
 }
 
 class BaseUrlInterceptor extends Interceptor {
-
   static const String enableAutoVpnUrl = "enableAutoVpnUrl";
 
   final hosts = [
@@ -676,32 +681,32 @@ class BaseUrlInterceptor extends Interceptor {
   Future<void> onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
     var newOptions = options;
-    final enableAutoVpnUrlValue = options.extra[enableAutoVpnUrl] as bool? ?? true;
+    final enableAutoVpnUrlValue =
+        options.extra[enableAutoVpnUrl] as bool? ?? true;
 
-    if (hosts.contains(newOptions.uri.host)) {
-      if (newOptions.uri.host == "bkjw.guet.edu.cn") {
-        final user = await UserRepository.get().getActiveUser();
-        if (user?.isUpgradedUndergrad == true) {
-          final uri = newOptions.uri
-              .replace(host: "bkjwsrv.guet.edu.cn");
-          newOptions = newOptions.copyWith(baseUrl: uri.toString());
-        }
-      }
-      if(enableAutoVpnUrlValue) {
-        final isCampusNetwork =
-            await NetworkDetectionRepository.get().isCampusNetwork;
-        final uri = newOptions.uri;
-
-        if (isCampusNetwork != true &&
-            uri.host != AppNetwork.webVpnHost &&
-            uri.query.contains(AppNetwork.webVpnHost) != true) {
-          final vpnUrl = Uri.parse(getWebVPNUrl(uri.toString()));
-          logger.d(vpnUrl);
-          logger.d(uri);
-          newOptions = newOptions.copyWith(baseUrl: vpnUrl.getBaseUrl(), path: vpnUrl.path);
-        }
+    // if (hosts.contains(newOptions.uri.host)) {
+    if (newOptions.uri.host == "bkjw.guet.edu.cn") {
+      final user = await UserRepository.get().getActiveUser();
+      if (user?.isUpgradedUndergrad == true) {
+        final uri = newOptions.uri.replace(host: "bkjwsrv.guet.edu.cn");
+        newOptions = newOptions.copyWith(baseUrl: uri.toString());
       }
     }
+    // if (enableAutoVpnUrlValue && !options.uri.path.startsWith("/http")) {
+    //   final isCampusNetwork =
+    //       await NetworkDetectionRepository.get().isCampusNetwork;
+    //   final uri = newOptions.uri;
+    //
+    //   if (isCampusNetwork != true &&
+    //       uri.host != AppNetwork.webVpnHost) {
+    //     final vpnUrl = Uri.parse(getWebVPNUrl(uri.toString()));
+    //     logger.d(vpnUrl);
+    //     logger.d(uri);
+    //     newOptions = newOptions.copyWith(
+    //         baseUrl: vpnUrl.getBaseUrl(), path: vpnUrl.path);
+    //   }
+    // }
+    // }
     handler.next(newOptions);
   }
 }

@@ -239,9 +239,9 @@ class _ProfilePageState extends State<ProfilePage>
                               Navigator.of(context)
                                   .pushNamed(AppRoute.toolboxPage);
                             },
-                            leading: Icon(Icons.build_outlined),
+                            leading: Icon(Icons.link),
                             // Icon for "连接校园网"
-                            title: Text("工具箱（新）"),
+                            title: Text("常用网站（新）"),
                             trailing: Icon(Icons.arrow_forward_ios_outlined),
                           ),
                           ListTile(

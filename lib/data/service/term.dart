@@ -6,6 +6,7 @@ import 'package:guethub/data/model/semester_response/semester_response.dart';
 import 'package:guethub/data/model/semesters/semesters.dart';
 import 'package:guethub/data/model/term/term.dart';
 import 'package:guethub/data/network.dart';
+import 'package:guethub/logger.dart';
 import 'package:json5/json5.dart';
 import 'package:html/parser.dart' as htmlParser;
 
@@ -75,7 +76,11 @@ class TermService {
         .join('\n\n');
 
     final semesters = extractSemesters(scripts);
-    if (semesters == null) throw Exception('Semesters not found');
+
+    if (semesters == null) {
+      logger.d(data);
+      throw Exception('Semesters not found');
+    }
     final currentSemester = extractCurrentSemester(scripts)!;
     return (
       semestersListFormJson(semesters),

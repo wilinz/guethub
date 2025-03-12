@@ -7,6 +7,7 @@ import 'package:guethub/common/encrypt/webvpn_new.dart';
 import 'package:guethub/data/model/dynamic_code/dynamic_code.dart';
 import 'package:guethub/data/model/dynamic_code/reauth.dart';
 import 'package:guethub/data/network.dart';
+import 'package:guethub/data/redirect_interceptor.dart';
 import 'package:guethub/logger.dart';
 import 'package:guethub/ui/util/toast.dart';
 import 'package:guethub/util/ext.dart';
@@ -29,23 +30,22 @@ class LoginService {
       bool isPostgraduate = false,
       required bool isCampusNetwork}) async {
     if (!isCampusNetwork) {
-      await loginCas(
-          dio: dio,
-          username: username,
-          password: password,
-          service: "https://v.guet.edu.cn/login?cas_login=true",
-          serviceHomeUrl: "https://v.guet.edu.cn/",
-          successVerify: (resp) {
-            final uriStr = resp.requestOptions.uri.toString();
-            final data = resp.data;
-            final b1 = uriStr == 'https://v.guet.edu.cn/';
-            final b2 = (uriStr.contains("/wengine-vpn-token-login") &&
-                (resp.statusCode ?? 400) < 300);
-            final b3 = data is String && data.contains("个人信息");
-            return b1 || b2 || b3;
-          },
-          isCampusNetwork: isCampusNetwork,
-          captchaHandler: captchaHandler);
+      // await loginCas(
+      //     dio: dio,
+      //     username: username,
+      //     password: password,
+      //     service: "https://v.guet.edu.cn/login?cas_login=true",
+      //     serviceHomeUrl: "https://v.guet.edu.cn/",
+      //     successVerify: (resp) {
+      //       final uriStr = resp.requestOptions.uri.toString();
+      //       final data = resp.data;
+      //       final b2 = (uriStr.contains("/wengine-vpn-token-login") &&
+      //           (resp.statusCode ?? 400) < 300);
+      //       final b3 = data is String && data.contains("个人信息");
+      //       return b2 || b3;
+      //     },
+      //     isCampusNetwork: isCampusNetwork,
+      //     captchaHandler: captchaHandler);
 
       // try {
       //   await loginCas(
@@ -171,13 +171,14 @@ class LoginService {
     final isNoUseWebVpn = isCampusNetwork;
     String getUri() => "authserver/login";
 
-    final serviceHomeResponse = await dio.get(isCampusNetwork == true
-        ? serviceHomeUrl
-        : getWebVPNUrl(serviceHomeUrl));
+    // final serviceHomeResponse = await dio.get(
+    //     /*  isCampusNetwork == true || serviceHomeUrl.contains("v.guet.edu.cn") ? serviceHomeUrl : getWebVPNUrl(serviceHomeUrl),*/
+    //     serviceHomeUrl,
+    //     options: Options(extra: {RedirectInterceptor.followRedirects: false}));
 
-    if (successVerify(serviceHomeResponse)) {
-      return serviceHomeResponse;
-    }
+    // if (successVerify(serviceHomeResponse)) {
+    //   return serviceHomeResponse;
+    // }
 
     var uri = firstGetUrl ?? getUri();
 

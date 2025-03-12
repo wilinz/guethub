@@ -124,9 +124,9 @@ class _ToolboxState extends State<Toolbox> {
                 children: [
                   IconButton(
                     onPressed: () {
-                      // launchUrl(Uri.parse(item.url),
-                      //     mode: LaunchMode.externalApplication);
-                      launcherWebView(item);
+                      launchUrl(Uri.parse(item.url),
+                          mode: LaunchMode.externalApplication);
+                      // launcherWebView(item);
                     },
                     icon: Icon(Icons.open_in_browser),
                   ),
@@ -153,7 +153,7 @@ class _ToolboxState extends State<Toolbox> {
   }
 
   Future<void> launcherWebView(ToolboxItem item) async {
-    Get.toNamed(AppRoute.webView, arguments: WebViewArgs(url: getWebVPNUrl(item.url)));
+    Get.toNamed(AppRoute.webView, arguments: WebViewArgs(url: item.url));
   }
 
 }
