@@ -76,7 +76,7 @@ class LoginViewModel extends GetxController {
     }
 
     isLoading.value = true;
-    final retryCount = 2;
+    final retryCount = 3;
     for (var i = 0; i < retryCount; i++) {
       try {
         await LoginRepository.get().loginAcademicAffairsSystem(
