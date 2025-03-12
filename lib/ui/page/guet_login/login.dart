@@ -125,7 +125,7 @@ class _LoginPageState extends State<LoginPage> {
                           builder: (context, snapshot) {
                             if (snapshot.hasData) {
                               return Text(
-                                (snapshot.data! ? "当前处于校园网" : "当前处于非校园网"),
+                                (snapshot.data! ? "当前处于校园网，目前建议使用移动数据登录，校园网可能存在无法登陆的BUG" : "当前处于非校园网"),
                                 textAlign: TextAlign.center,
                               );
                             }
