@@ -199,5 +199,9 @@ final migration19to20 = Migration(19, 20, (database) async {
 });
 
 final migration20to21 = Migration(20, 21, (database) async {
-  await database.execute("ALTER TABLE `users` ADD COLUMN `experiment_system_token` TEXT DEFAULT NULL");
+  var res = await database.rawQuery("PRAGMA table_info(users)");
+  bool columnExists = res.any((column) => column['name'] == 'experiment_system_token');
+  if (!columnExists) {
+    await database.execute("ALTER TABLE `users` ADD COLUMN `experiment_system_token` TEXT DEFAULT NULL");
+  }
 });
