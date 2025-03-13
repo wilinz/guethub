@@ -33,7 +33,7 @@ extension UriExtension on Uri {
     return replace(queryParameters: {});
   }
 
-  /// 获取Uri的基本URL（协议+域名）
+  /// 获取Uri的基本URL（协议+域名）+ "/"
   String getBaseUrl() {
     // 确保Uri包含有效的主机名
     if (this.host.isEmpty) {
@@ -48,7 +48,7 @@ extension UriExtension on Uri {
       baseUrl += ':${this.port}';
     }
 
-    return baseUrl;
+    return baseUrl + "/";
   }
 
   /// 判断指定的端口是否为给定协议的标准端口
