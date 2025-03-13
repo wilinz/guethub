@@ -15,6 +15,7 @@ import 'package:get/get.dart' as getx;
 import 'package:get/get_core/src/get_main.dart';
 import 'package:guethub/common/encrypt/webvpn.dart';
 import 'package:guethub/common/encrypt/webvpn_new.dart';
+import 'package:guethub/data/device/tracking.dart';
 import 'package:guethub/data/get_storage.dart';
 import 'package:guethub/data/redirect_interceptor.dart';
 import 'package:guethub/data/repository/login.dart';
@@ -246,7 +247,7 @@ class AppNetwork {
         "${packageInfo.appName}/${packageInfo.version}+${packageInfo.buildNumber} | ${packageInfo.packageName} | ${packageInfo.installerStore} | (${getPlatformInfo()})";
     dio.options = BaseOptions(
       baseUrl: isDev ? devAppBaseUrl : appBaseUrl,
-      headers: {"User-Agent": Uri.encodeFull(userAgent)},
+      headers: {"User-Agent": Uri.encodeFull(userAgent), "udid": udid},
       followRedirects: false,
       validateStatus: (int? status) => status != null,
     );
