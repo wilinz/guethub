@@ -26,6 +26,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:window_size/window_size.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'data/device/tracking.dart';
 import 'generated/locales.g.dart';
 import 'map/amap.dart';
 import 'ui/page/theme/theme_changer_controller.dart';
@@ -35,20 +36,39 @@ Future<void> main() async {
   //确保组件树初始化
   WidgetsFlutterBinding.ensureInitialized();
   final t1 = DateTime.now();
-  await RustLib.init();
+  await initDesktopWindow();
+
   await Future.wait([
     initGetStorage(),
+    initFlutterUdid(),
     initFilePath(),
+    initPackageInfo(),
+    initAmap()
   ]);
   await () async {
     await initLoggerOnLaunch();
-    await Future.wait([initAppDatabase(), initPackageInfo()]);
+    await Future.wait([initAppDatabase()]);
     await AppNetwork.init();
   }();
 
-  initAmap();
+  try {
+    clearDiskCachedImages(duration: Duration(days: 7));
+  } catch (e) {
+    logger.e(e);
+  }
+
+  NetworkDetectionRepository.get().refresh();
+  CampusNetworkRepository.get().refresh();
+  BackgroundImageRepository.get().init();
+
   final t2 = DateTime.now();
-  logger.d(t2.millisecondsSinceEpoch - t1.millisecondsSinceEpoch);
+  logger.d(
+      "Init consuming: ${t2.millisecondsSinceEpoch - t1.millisecondsSinceEpoch}");
+
+  runApp(const MyApp());
+}
+
+Future<void> initDesktopWindow() async {
   if (PlatformUtil.isDesktop()) {
     final screen = await getCurrentScreen();
     logger.d(screen?.visibleFrame.width);
@@ -58,7 +78,7 @@ Future<void> main() async {
     final padding = 32 / sc;
     final height =
         ((screen?.visibleFrame.height ?? 450) + padding * 2) - padding * 2;
-    final size = Size(height*1.5, height) / sc;
+    final size = Size(height * 1.5, height) / sc;
     logger.d(size);
 
     // 必须加上这一行。
@@ -79,17 +99,6 @@ Future<void> main() async {
       await windowManager.focus();
     });
   }
-
-  try {
-    clearDiskCachedImages(duration: Duration(days: 7));
-  } catch (e) {
-    logger.e(e);
-  }
-
-  NetworkDetectionRepository.get().refresh();
-  CampusNetworkRepository.get().refresh();
-  BackgroundImageRepository.get().init();
-  runApp(const MyApp());
 }
 
 showSnackBar(BuildContext context, String msg, int milliseconds) {
@@ -153,9 +162,7 @@ class _MyAppState extends State<MyApp> with WindowListener {
   void initState() {
     windowManager.addListener(this);
     super.initState();
-    subscription = Connectivity()
-        .onConnectivityChanged
-        .listen((result) {
+    subscription = Connectivity().onConnectivityChanged.listen((result) {
       NetworkDetectionRepository.get().refresh();
       CampusNetworkRepository.get().refresh();
     });

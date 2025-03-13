@@ -73,7 +73,7 @@ Future<void> initLoggerOnLaunch() async {
     level = Level.fatal;
   }
 
-  initLogger(level: level);
+  await initLogger(level: level);
 }
 
 Future<void> initLogger({Level? level}) async {
@@ -144,9 +144,4 @@ Future<void> initLogger({Level? level}) async {
       ]),
       level: level);
 
-  logger.d('This is a debug message');
-  logger.i('This is an info message');
-  logger.w('This is a warning message');
-  logger.e('This is an error message');
-  logger.i("logger init success!");
 }

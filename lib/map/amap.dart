@@ -20,5 +20,5 @@ Future<void> initAmap() async {
       iosKey: AmapConfig.iosApiKey,
       androidKey: AmapConfig.androidApiKey);
 
-  if (ok) print('高德地图ApiKey设置成功');
+  if (ok) print('Init Amap successful');
 }

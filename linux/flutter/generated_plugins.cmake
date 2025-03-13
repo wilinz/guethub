@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   emoji_picker_flutter
   file_selector_linux
   flutter_localization
+  flutter_udid
   screen_retriever
   sqlite3_flutter_libs
   url_launcher_linux

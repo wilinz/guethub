@@ -121,6 +121,7 @@ dependencies:
     # the parent directory to use the current plugin's version.
     path: rust_module
   fl_channel: ^1.0.3
+  flutter_udid: ^4.0.0
 
 
 dev_dependencies:
