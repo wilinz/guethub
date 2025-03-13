@@ -711,7 +711,7 @@ class BaseUrlInterceptor extends Interceptor {
       final user = await UserRepository.get().getActiveUser();
       if (user?.isUpgradedUndergrad == true) {
         final uri = newOptions.uri.replace(host: "bkjwsrv.guet.edu.cn");
-        newOptions = newOptions.copyWith(baseUrl: uri.toString());
+        newOptions = newOptions.copyWith(baseUrl: uri.getBaseUrl());
       }
     }
     // if (enableAutoVpnUrlValue && !options.uri.path.startsWith("/http")) {
