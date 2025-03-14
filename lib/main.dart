@@ -25,7 +25,7 @@ import 'package:guethub/util/platform.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:window_size/window_size.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
+import 'package:rust_module/rust_module.dart';
 import 'data/device/tracking.dart';
 import 'generated/locales.g.dart';
 import 'map/amap.dart';
@@ -38,6 +38,7 @@ Future<void> main() async {
   final t1 = DateTime.now();
   await initDesktopWindow();
 
+  await RustLib.init();
   await Future.wait([
     initGetStorage(),
     initFlutterUdid(),
