@@ -1,8 +1,6 @@
 import 'package:dart_extensions/dart_extensions.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:guethub/common/list.dart';
-import 'package:guethub/data/model/empty_classroom/empty_classroom.dart';
 import 'package:guethub/data/model/empty_classroom/empty_classroom_buildings/empty_classroom_buildings.dart';
 import 'package:guethub/data/model/empty_classroom/empty_classroom_config/empty_classroom_config.dart';
 import 'package:guethub/data/model/empty_classroom/empty_classroom_query_body/empty_classroom_query_body.dart';
@@ -10,8 +8,6 @@ import 'package:guethub/data/model/empty_classroom/empty_classroom_query_result/
 import 'package:guethub/data/model/empty_classroom/empty_classroom_rooms/empty_classroom_rooms.dart';
 import 'package:guethub/util/js.dart';
 import 'package:guethub/util/string_ext.dart';
-import 'package:html/parser.dart' as htmlParser;
-import 'package:guethub/data/network.dart';
 import 'package:html/parser.dart';
 import 'package:json5/json5.dart';
 
