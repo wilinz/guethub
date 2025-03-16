@@ -9,9 +9,11 @@ import 'package:guethub/data/model/exam_scheduling/exam_schedule.dart' as old;
 import 'package:guethub/data/network.dart';
 import 'package:guethub/data/util/md5sum.dart';
 import 'package:guethub/data/util/section_finder.dart';
+import 'package:guethub/logger.dart';
 import 'package:guethub/util/datetime.dart';
 import 'package:guethub/util/list.dart';
 import 'package:html/parser.dart' as html_parser;
+import 'package:rust_module/rust_module.dart';
 
 class ExamScheduleService {
   @Deprecated("Old system")
@@ -36,13 +38,17 @@ class ExamScheduleService {
   // 302 to https://bkjwtest.guet.edu.cn/student/for-std/exam-arrange/info/104676
   static Future<List<ExamSchedule>> getExamScheduleNew(Dio dio,
       {required int studentId}) async {
-    final resp =
-        await dio.get("student/for-std/exam-arrange/info/${studentId}");
-    final data = await compute<String, List<Map<String, dynamic>>>(
-        _parseSchedules, resp.data);
-    return examScheduleListFormJson(data);
-    ;
+    final resp = await dio.get("student/for-std/exam-arrange/info/${studentId}",
+        options: Options(responseType: ResponseType.bytes));
+    final t1 = DateTime.timestamp();
+    final data = await parseExamSchedules(html: resp.data);
+    final t2 = DateTime.timestamp();
+    logger.i("parseExamSchedules: ${t2.difference(t1).inMilliseconds} ms");
+
+    if(data == null) throw Exception("parseExamSchedules failed");
+    return examScheduleListFormJson(jsonDecode(utf8.decode(data)));
   }
+
 }
 
 (DateTime, DateTime) _parseTime(String time) {

@@ -1,14 +1,17 @@
 use base64::Engine;
 use hex::{self, decode as hex_decode, encode as hex_encode};
 
+use crate::api::cfbcrypto::AesCfb;
+use aes::cipher::{BlockDecryptMut, BlockEncryptMut, KeyIvInit};
+
 use rand::distr::Alphanumeric;
 use rand::{rng, Rng};
-use block_modes::{BlockMode, Cbc};
 use std::str;
-use aes::{Aes128, NewBlockCipher};
-use block_modes::block_padding::Pkcs7;
-use cipher::KeyInit;
-use crate::api::cfbcrypto::AesCfb;
+use block_padding::generic_array::GenericArray;
+use block_padding::Pkcs7;
+
+type Aes128CbcEnc = cbc::Encryptor<aes::Aes128>;
+type Aes128CbcDec = cbc::Decryptor<aes::Aes128>;
 
 #[flutter_rust_bridge::frb(sync)]
 pub fn get_encrypt_web_vpn_host(plaintext: &str, key: &[u8], iv: &[u8]) -> String {
@@ -91,8 +94,6 @@ pub fn get_web_vpn_ordinary_url(url: &str, key: &[u8], iv: &[u8]) -> String {
     }
 }
 
-type Aes128Cbc = Cbc<Aes128, Pkcs7>;
-
 #[flutter_rust_bridge::frb(sync)]
 // 加密函数
 pub fn encrypt_aes_128_cbc_64prefix(plain: &str, key: &[u8]) -> String {
@@ -114,11 +115,19 @@ pub fn encrypt_aes_128_cbc_64prefix(plain: &str, key: &[u8]) -> String {
 
     // 拼接随机字符串和密码
     let plaintext = format!("{}{}", random_str, plain);
-
-    let cipher = Aes128Cbc::new_from_slices(&key, &iv).expect("Aes128Cbc::new_from_slices failed");
     let plain = plaintext.as_bytes();
-    let ciphertext = cipher.encrypt_vec(plain);
-    base64::engine::general_purpose::STANDARD.encode(&ciphertext)
+
+    let key_arr = GenericArray::from_slice(&key);
+    let iv_arr = GenericArray::from_slice(&iv);
+
+    let mut out = vec![0; plain.len() + 16];
+    let len = Aes128CbcEnc::new(&key_arr, &iv_arr)
+        .encrypt_padded_b2b_mut::<Pkcs7>(&plain, &mut out)
+        .expect("enough space for encrypting is allocated")
+        .len();
+    out.truncate(len);
+
+    base64::engine::general_purpose::STANDARD.encode(&out)
 }
 
 #[flutter_rust_bridge::frb(sync)]
@@ -130,7 +139,7 @@ pub fn decrypt_aes_128_cbc_64prefix(encrypted_base64: &str, key: &[u8]) -> Strin
     }
 
     // 解码 Base64
-    let encrypted_data = base64::engine::general_purpose::STANDARD
+    let encrypted = base64::engine::general_purpose::STANDARD
         .decode(encrypted_base64)
         .expect("Invalid Base64");
 
@@ -138,13 +147,22 @@ pub fn decrypt_aes_128_cbc_64prefix(encrypted_base64: &str, key: &[u8]) -> Strin
     let mut iv = [0u8; 16];
     rng().fill(&mut iv);
 
-    let cipher = Aes128Cbc::new_from_slices(&key, &iv).unwrap();
-    let decrypted = cipher.decrypt_vec(&encrypted_data).expect("Decryption failed").split_off(64);
+    let key_arr = GenericArray::from_slice(&key);
+    let iv_arr = GenericArray::from_slice(&iv);
+
+    let mut out = vec![0; encrypted.len() + 16];
+    let len = Aes128CbcDec::new(&key_arr, &iv_arr)
+        .decrypt_padded_b2b_mut::<Pkcs7>(&encrypted, &mut out)
+        .expect("enough space for encrypting is allocated")
+        .len();
+    out.truncate(len);
+
+    let decrypted = out.split_off(64);
     String::from_utf8(decrypted).expect("Invalid UTF-8")
 }
 
 #[flutter_rust_bridge::frb(init)]
 pub fn init_app() {
     // Default utilities - feel free to customize
-    flutter_rust_bridge::setup_default_user_utils();
+    // flutter_rust_bridge::setup_default_user_utils();
 }

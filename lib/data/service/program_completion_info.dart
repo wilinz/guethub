@@ -1,10 +1,15 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:guethub/data/model/graduate_info/graduate_info.dart';
 import 'package:guethub/data/model/program_completion_info/program_completion_info.dart';
 import 'package:guethub/data/repository/user.dart';
+import 'package:guethub/logger.dart';
 import 'package:guethub/util/string_ext.dart';
 import 'package:html/parser.dart';
+import 'package:kt_dart/kt.dart';
+import 'package:rust_module/rust_module.dart';
 
 class ProgramCompletionInfoService {
   static Future<GraduateInfo?> getGraduateInfo(Dio dio) async {
@@ -12,11 +17,15 @@ class ProgramCompletionInfoService {
         await UserRepository.get().getNewSystemStudentIdFromLocal();
 
     final url = "student/for-std/program-completion-preview/info/${studentId}";
-    final resp2 = await dio
-        .get(url, options: Options(responseType: ResponseType.plain));
-    final parseLoginHtmlResult = await compute<String, GraduateInfo?>(
-        parseGraduateInfo, resp2.data);
-    return parseLoginHtmlResult;
+    final resp2 =
+        await dio.get(url, options: Options(responseType: ResponseType.bytes));
+    final t1 = DateTime.timestamp();
+    final graduateInfoRust = await parseGraduateInfo(html: resp2.data);
+    final t2 = DateTime.timestamp();
+    logger.i("parseGraduateInfo: ${t2.difference(t1).inMilliseconds}  ms");
+
+    return graduateInfoRust?.let((it) =>
+        GraduateInfo.fromJson(jsonDecode(utf8.decode(graduateInfoRust))));
   }
 
   static Future<ProgramCompletionInfo> getProgramCompletionInfo(Dio dio,
@@ -25,7 +34,6 @@ class ProgramCompletionInfoService {
         "student/for-std/credit-certification-apply/other_apply/get-all-course-module?programId=${programId}");
     return ProgramCompletionInfo.fromJson(resp.data);
   }
-
 }
 
 final _fieldKeyMap = {
@@ -34,7 +42,7 @@ final _fieldKeyMap = {
   "学分绩": "gpa",
 };
 
-GraduateInfo? parseGraduateInfo(String html) {
+GraduateInfo? _parseGraduateInfoDart(String html) {
   final doc = parse(html);
   final graduateInfo = doc.querySelector(".graduate-info");
   final items = graduateInfo?.querySelectorAll("p");
@@ -52,7 +60,9 @@ GraduateInfo? parseGraduateInfo(String html) {
     }
   }
 
-  String? programId = doc.querySelector('input[name="targetProgramAssoc"]')?.attributes['value'];
+  String? programId = doc
+      .querySelector('input[name="targetProgramAssoc"]')
+      ?.attributes['value'];
   result['programId'] = programId;
   return GraduateInfo.fromJson(result);
 }

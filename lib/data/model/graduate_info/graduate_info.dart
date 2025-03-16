@@ -4,7 +4,6 @@ part 'graduate_info.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class GraduateInfo {
-
   GraduateInfo(
       {required this.graduation,
       required this.degree,
@@ -23,12 +22,11 @@ class GraduateInfo {
   @JsonKey(name: "programId", defaultValue: "")
   String programId;
 
+  factory GraduateInfo.fromJson(Map<String, dynamic> json) =>
+      _$GraduateInfoFromJson(json);
 
-  factory GraduateInfo.fromJson(Map<String, dynamic> json) => _$GraduateInfoFromJson(json);
-  
   Map<String, dynamic> toJson() => _$GraduateInfoToJson(this);
-  
-  factory GraduateInfo.emptyInstance() => GraduateInfo(graduation: "", degree: "", gpa: "", programId: "");
+
+  factory GraduateInfo.emptyInstance() =>
+      GraduateInfo(graduation: "", degree: "", gpa: "", programId: "");
 }
-
-

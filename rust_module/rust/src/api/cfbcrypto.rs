@@ -1,3 +1,6 @@
+use aes::Aes128;
+use cipher::{BlockEncrypt, KeyInit};
+
 pub struct AesCfb {
     pub key: [u8; 16],
     pub iv: [u8; 16],
@@ -75,9 +78,7 @@ impl AesCfb {
     fn aes_encrypt(&self, block: &mut [u8; 16]) {
         // Here you would implement the AES encryption algorithm.
         // For simplicity, we'll use the `aes` crate's implementation.
-        use aes::{Aes128, BlockEncrypt, NewBlockCipher};
         use cipher::generic_array::GenericArray;
-
         let cipher = Aes128::new(GenericArray::from_slice(&self.key));
         let mut block_array = GenericArray::from_mut_slice(block);
         cipher.encrypt_block(&mut block_array);
