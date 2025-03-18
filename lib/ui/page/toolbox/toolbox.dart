@@ -72,7 +72,11 @@ class _ToolboxState extends State<Toolbox> {
       url: "https://yjapp.guet.edu.cn",
     ),
     ToolboxItem(
-      title: "智慧教学平台（手机版）",
+      title: "畅课智慧教学平台（桌面版）",
+      url: "https://courses.guet.edu.cn",
+    ),
+    ToolboxItem(
+      title: "畅课智慧教学平台（手机版）",
       url: "https://mobile.guet.edu.cn",
     ),
     // ToolboxItem(
