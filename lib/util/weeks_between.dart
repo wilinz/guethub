@@ -1,9 +1,6 @@
 import 'package:guethub/logger.dart';
 
 int calculateWeekNumber(DateTime startDate, DateTime targetDate) {
-  logger.d(
-      "start: ${startDate.toIso8601String()} ${startDate.timeZoneOffset} end: ${targetDate.toIso8601String()} ${targetDate.timeZoneOffset}");
-
   // 移除时间部分，只保留日期部分
   DateTime startDateOnly =
       DateTime(startDate.year, startDate.month, startDate.day);
@@ -24,9 +21,5 @@ int calculateWeekNumber(DateTime startDate, DateTime targetDate) {
   // 计算差异周数
   int weekNumber = differenceInDays ~/ 7;
 
-  logger.d(
-      "start: ${startOfWeek.toIso8601String()} ${startOfWeek.timeZoneOffset} end: ${targetStartOfWeek.toIso8601String()} ${targetStartOfWeek.timeZoneOffset}");
-
-  logger.d("weeks: ${weekNumber}");
   return weekNumber;
 }

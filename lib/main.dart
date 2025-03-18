@@ -16,6 +16,7 @@ import 'package:guethub/data/network.dart';
 import 'package:guethub/data/repository/background_image.dart';
 import 'package:guethub/data/repository/campus_network.dart';
 import 'package:guethub/data/repository/network_detection.dart';
+import 'package:guethub/device_info.dart';
 import 'package:guethub/package_info.dart';
 import 'package:guethub/path.dart';
 import 'package:rust_module/src/rust/frb_generated.dart';
@@ -40,6 +41,7 @@ Future<void> main() async {
 
   await RustLib.init();
   await Future.wait([
+    initDeviceInfo(),
     initGetStorage(),
     initFlutterUdid(),
     initFilePath(),

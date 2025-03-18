@@ -105,19 +105,23 @@ class LoginService {
 
   static Future<void> loginOldSystem(Dio dio, String username, String password,
       CaptchaHandler captchaHandler, bool isCampusNetwork) async {
-    await loginCas(
-        dio: dio,
-        username: username,
-        password: password,
-        service: "https://bkjw.guet.edu.cn",
-        serviceHomeUrl: "https://bkjw.guet.edu.cn/",
-        successVerify: (resp) {
-          final data = resp.data;
-          final result = data is String && data.contains("用户类型：学生");
-          return result;
-        },
-        isCampusNetwork: isCampusNetwork,
-        captchaHandler: captchaHandler);
+    try {
+      await loginCas(
+              dio: dio,
+              username: username,
+              password: password,
+              service: "https://bkjw.guet.edu.cn",
+              serviceHomeUrl: "https://bkjw.guet.edu.cn/",
+              successVerify: (resp) {
+                final data = resp.data;
+                final result = data is String && data.contains("用户类型：学生");
+                return result;
+              },
+              isCampusNetwork: isCampusNetwork,
+              captchaHandler: captchaHandler);
+    } catch (e) {
+      print(e);
+    }
   }
 
   static Future<void> loginNewSystem(Dio dio, String username, String password,

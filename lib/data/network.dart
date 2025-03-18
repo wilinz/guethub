@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
@@ -25,6 +26,7 @@ import 'package:guethub/data/service/course_select.dart';
 import 'package:guethub/data/service/experiment.dart';
 import 'package:guethub/data/service/login.dart';
 import 'package:guethub/data/service/teaching_evaluation.dart';
+import 'package:guethub/device_info.dart';
 import 'package:guethub/logger.dart';
 import 'package:guethub/package_info.dart';
 import 'package:guethub/path.dart';
@@ -227,19 +229,25 @@ class AppNetwork {
 
   static String getPlatformInfo() {
     if (Platform.isAndroid) {
-      return 'Android ${Platform.operatingSystemVersion}';
+      AndroidDeviceInfo androidInfo = deviceInfo as AndroidDeviceInfo;
+      return 'Android ${Platform.operatingSystemVersion} | ${androidInfo.brand} ${androidInfo.model}';
     } else if (Platform.isIOS) {
-      return 'iOS ${Platform.operatingSystemVersion}';
+      IosDeviceInfo iosInfo = deviceInfo as IosDeviceInfo;
+      return 'iOS ${Platform.operatingSystemVersion} | ${iosInfo.name} ${iosInfo.model}';
     } else if (Platform.isLinux) {
-      return 'Linux ${Platform.operatingSystemVersion}';
+      LinuxDeviceInfo linuxInfo = deviceInfo as LinuxDeviceInfo;
+      return 'Linux ${Platform.operatingSystemVersion} | ${linuxInfo.name ?? 'Unknown'}';
     } else if (Platform.isMacOS) {
-      return 'macOS ${Platform.operatingSystemVersion}';
+      MacOsDeviceInfo macInfo = deviceInfo as MacOsDeviceInfo;
+      return 'macOS ${Platform.operatingSystemVersion} | ${macInfo.model ?? 'Unknown'}';
     } else if (Platform.isWindows) {
-      return 'Windows ${Platform.operatingSystemVersion}';
+      WindowsDeviceInfo winInfo = deviceInfo as WindowsDeviceInfo;
+      return 'Windows ${Platform.operatingSystemVersion} | ${winInfo.computerName}';
     } else {
       return 'Unknown Platform';
     }
   }
+
 
   static setupAppDio(Dio dio, CookieJar cookieJar) {
     // 定义包含平台信息的User-Agent
