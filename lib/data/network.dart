@@ -230,19 +230,19 @@ class AppNetwork {
   static String getPlatformInfo() {
     if (Platform.isAndroid) {
       AndroidDeviceInfo androidInfo = deviceInfo as AndroidDeviceInfo;
-      return 'Android ${Platform.operatingSystemVersion} | ${androidInfo.brand} ${androidInfo.model}';
+      return 'Android ${Platform.operatingSystemVersion} | ${androidInfo.brand} ${androidInfo.model} | ${androidInfo.version.release}';
     } else if (Platform.isIOS) {
       IosDeviceInfo iosInfo = deviceInfo as IosDeviceInfo;
-      return 'iOS ${Platform.operatingSystemVersion} | ${iosInfo.name} ${iosInfo.model}';
+      return 'iOS ${Platform.operatingSystemVersion} | ${iosInfo.name} ${iosInfo.model} | ${iosInfo.systemVersion}';
     } else if (Platform.isLinux) {
       LinuxDeviceInfo linuxInfo = deviceInfo as LinuxDeviceInfo;
-      return 'Linux ${Platform.operatingSystemVersion} | ${linuxInfo.name ?? 'Unknown'}';
+      return 'Linux ${Platform.operatingSystemVersion} | ${linuxInfo.name ?? 'Unknown'} | ${linuxInfo.version ?? 'Unknown'}';
     } else if (Platform.isMacOS) {
       MacOsDeviceInfo macInfo = deviceInfo as MacOsDeviceInfo;
-      return 'macOS ${Platform.operatingSystemVersion} | ${macInfo.model ?? 'Unknown'}';
+      return 'macOS ${Platform.operatingSystemVersion} | ${macInfo.model ?? 'Unknown'} | ${macInfo.osRelease ?? 'Unknown'}';
     } else if (Platform.isWindows) {
       WindowsDeviceInfo winInfo = deviceInfo as WindowsDeviceInfo;
-      return 'Windows ${Platform.operatingSystemVersion} | ${winInfo.computerName}';
+      return 'Windows ${Platform.operatingSystemVersion} | ${winInfo.computerName} | ${winInfo.displayVersion}';
     } else {
       return 'Unknown Platform';
     }
