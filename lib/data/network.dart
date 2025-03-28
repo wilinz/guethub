@@ -230,7 +230,7 @@ class AppNetwork {
   static String getPlatformInfo() {
     if (Platform.isAndroid) {
       AndroidDeviceInfo androidInfo = deviceInfo as AndroidDeviceInfo;
-      return 'Android ${Platform.operatingSystemVersion} | ${androidInfo.brand} ${androidInfo.model} | ${androidInfo.version.release}';
+      return 'Android ${Platform.operatingSystemVersion} | ${androidInfo.brand} ${androidInfo.model} | ${androidInfo.version.release} | ${androidInfo.manufacturer} | ${androidInfo.name}';
     } else if (Platform.isIOS) {
       IosDeviceInfo iosInfo = deviceInfo as IosDeviceInfo;
       return 'iOS ${Platform.operatingSystemVersion} | ${iosInfo.name} ${iosInfo.model} | ${iosInfo.systemVersion}';
