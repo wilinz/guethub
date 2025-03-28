@@ -150,10 +150,18 @@ class _ProfilePageState extends State<ProfilePage>
                                     .pushNamed(AppRoute.examSchedulePage);
                               },
                               leading: Icon(Icons.calendar_today_outlined),
-                              // Icon for "连接校园网"
                               title: Text("考试安排"),
                               trailing: Icon(Icons.arrow_forward_ios_outlined),
                             ),
+                          ListTile(
+                            onTap: () {
+                              Navigator.of(context)
+                                  .pushNamed(AppRoute.changkePage);
+                            },
+                            leading: Icon(Icons.bookmark_outline_outlined),
+                            title: Text("畅课"),
+                            trailing: Icon(Icons.arrow_forward_ios_outlined),
+                          ),
                           if (c.isUpgradedUndergrad.isFalse)
                             ListTile(
                               onTap: () {

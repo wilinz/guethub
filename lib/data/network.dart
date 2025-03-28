@@ -189,12 +189,44 @@ class AppNetwork {
     dio.interceptors.addAll([
       BaseUrlInterceptor(),
       CookieManager(cookieJar),
-      TeachingEvaluationAuthInterceptor(dio),
+      TeachingEvaluationAuthInterceptor(interceptorsDio),
       CourseSelectAuthInterceptor(interceptorsDio),
       GuetLoginInterceptor(interceptorsDio),
       RedirectInterceptor(interceptorsDio),
       RefererInterceptor(),
       ExperimentSystemAuthInterceptor(interceptorsDio),
+      DioExceptionInterceptor(),
+      RetryInterceptor(
+          dio: dio,
+          logPrint: (msg) {
+            logger.i(msg);
+          },
+          toNoInternetPageNavigator: () async {},
+          retries: 3,
+          retryDelays: [Duration(milliseconds: 100)])
+    ]);
+    // _proxy(dio);
+    // setupGuetProxy(dio);
+    setDioLogger(dio);
+    return dio;
+  }
+
+  static setupChangkeTestDio(Dio dio, CookieJar cookieJar) {
+    final interceptorsDio = () async => AppNetwork.get().changkeDio;
+    dio.options = BaseOptions(
+        headers: {"User-Agent": userAgent},
+        followRedirects: false,
+        validateStatus: (int? status) => status != null,
+        connectTimeout: Duration(minutes: 1),
+        receiveTimeout: Duration(minutes: 5),
+        sendTimeout: Duration(minutes: 5));
+    dio.interceptors.addAll([
+      BaseUrlInterceptor(),
+      CookieManager(cookieJar),
+      ChangkeAuthInterceptor(),
+      GuetLoginInterceptor(interceptorsDio),
+      RedirectInterceptor(interceptorsDio),
+      RefererInterceptor(),
       DioExceptionInterceptor(),
       RetryInterceptor(
           dio: dio,
@@ -333,6 +365,9 @@ class AppNetwork {
   late Dio _casDio;
   late Dio _casDioProxy;
 
+  late Dio _changkeDio;
+  late Dio _changkeProxy;
+
   Future<Dio> get bkjwDio async {
     final isCampusNetwork =
         await NetworkDetectionRepository.get().isCampusNetwork;
@@ -349,6 +384,12 @@ class AppNetwork {
     final isCampusNetwork =
         await NetworkDetectionRepository.get().isCampusNetwork;
     return isCampusNetwork == true ? _casDio : _casDioProxy;
+  }
+
+  Future<Dio> get changkeDio async {
+    final isCampusNetwork =
+        await NetworkDetectionRepository.get().isCampusNetwork;
+    return isCampusNetwork == true ? _changkeDio : _changkeProxy;
   }
 
   late Dio noProxyDio;
@@ -411,6 +452,10 @@ class AppNetwork {
       instance._bkjwTestDio = setupBkjwTestDio(newDio(), instance.cookieJar);
       instance._bkjwTestDioProxy = setupGuetProxy1(
           instance._bkjwTestDio.clone(httpClientAdapter: HttpClientAdapter()));
+
+      instance._changkeDio = setupBkjwTestDio(newDio(), instance.cookieJar);
+      instance._changkeProxy = setupGuetProxy1(
+          instance._changkeDio.clone(httpClientAdapter: HttpClientAdapter()));
 
       instance.noProxyDio = setupNoProxyDio(newDio(), instance.cookieJar);
       instance.appDio =
@@ -867,7 +912,7 @@ class CourseSelectAuthInterceptor extends Interceptor {
 }
 
 class TeachingEvaluationAuthInterceptor extends Interceptor {
-  final Dio dio;
+  final Future<Dio> Function() dio;
 
   TeachingEvaluationAuthInterceptor(this.dio);
 
@@ -890,18 +935,44 @@ class TeachingEvaluationAuthInterceptor extends Interceptor {
 
     var token = user.teachingEvaluationToken;
     if (token == null) {
-      token = await TeachingEvaluationService.getToken(dio);
+      token = await TeachingEvaluationService.getToken(await dio());
       UserRepository.get().updateUser(user..teachingEvaluationToken = token);
     } else {
       final jwt = JWT.decode(token);
       final exp = DateTime.fromMillisecondsSinceEpoch(
           (jwt.payload['exp'] as int) * 1000);
       if (exp.isBefore(DateTime.now())) {
-        token = await TeachingEvaluationService.getToken(dio);
+        token = await TeachingEvaluationService.getToken(await dio());
         UserRepository.get().updateUser(user..teachingEvaluationToken = token);
       }
     }
     options.headers['authorization'] = token;
+    handler.next(options);
+  }
+}
+
+// changke_session_id
+class ChangkeAuthInterceptor extends Interceptor {
+
+  ChangkeAuthInterceptor();
+
+  @override
+  Future<void> onRequest(
+      RequestOptions options, RequestInterceptorHandler handler) async {
+    final url = options.uri.toString();
+    if (!url.contains("https://courses.guet.edu.cn/")) {
+      handler.next(options);
+      return;
+    }
+
+    final user = await UserRepository.get().getActiveUser();
+    if (user == null) {
+      handler.next(options);
+      return;
+    }
+
+    final token = user.changkeSessionId;
+    options.headers['x-session-id'] = token;
     handler.next(options);
   }
 }

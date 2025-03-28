@@ -38,6 +38,9 @@ class User extends BaseEntityEquatable {
   @ColumnInfo(name: "experiment_system_token")
   String? experimentSystemToken;
 
+  @ColumnInfo(name: "changke_session_id")
+  String? changkeSessionId;
+
   @ColumnInfo(name: "is_upgraded_undergrad")
   bool isUpgradedUndergrad;
 

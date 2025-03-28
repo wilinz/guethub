@@ -96,7 +96,7 @@ class _$AppDatabase extends AppDatabase {
     Callback? callback,
   ]) async {
     final databaseOptions = sqflite.OpenDatabaseOptions(
-      version: 21,
+      version: 22,
       onConfigure: (database) async {
         await database.execute('PRAGMA foreign_keys = ON');
         await callback?.onConfigure?.call(database);
@@ -114,7 +114,7 @@ class _$AppDatabase extends AppDatabase {
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `semester_schedule` (`id` TEXT NOT NULL, `username` TEXT NOT NULL, `source` TEXT NOT NULL, `start_datetime` INTEGER, `end_datetime` INTEGER, `start_time` TEXT, `end_time` TEXT, `type` TEXT NOT NULL, `typename` TEXT NOT NULL, `exam_type` TEXT NOT NULL, `college_name` TEXT NOT NULL, `major_name` TEXT NOT NULL, `grade` TEXT NOT NULL, `name` TEXT NOT NULL, `course_no` TEXT NOT NULL, `teachers` TEXT NOT NULL, `term` TEXT NOT NULL, `term_name` TEXT NOT NULL, `capacity` INTEGER NOT NULL, `selected` INTEGER NOT NULL, `credits` REAL NOT NULL, `is_lab` INTEGER NOT NULL, `lab_lesson_id` TEXT NOT NULL, `batch` INTEGER NOT NULL, `comment` TEXT NOT NULL, `experiment` TEXT NOT NULL, `experiment_no` TEXT NOT NULL, `classroom` TEXT NOT NULL, `classroom_alias` TEXT NOT NULL, `start_week` INTEGER NOT NULL, `end_week` INTEGER NOT NULL, `weekday` INTEGER NOT NULL, `section` INTEGER NOT NULL, `create_time` INTEGER NOT NULL, `update_time` INTEGER NOT NULL, PRIMARY KEY (`id`, `username`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `username` TEXT NOT NULL, `name` TEXT, `new_system_student_id` INTEGER, `password` TEXT NOT NULL, `is_active` INTEGER NOT NULL, `is_only_use_old_system` INTEGER NOT NULL, `teaching_evaluation_token` TEXT, `course_select_token` TEXT, `experiment_system_token` TEXT, `is_upgraded_undergrad` INTEGER NOT NULL, `is_postgraduate` INTEGER NOT NULL, `create_time` INTEGER NOT NULL, `update_time` INTEGER NOT NULL)');
+            'CREATE TABLE IF NOT EXISTS `users` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `username` TEXT NOT NULL, `name` TEXT, `new_system_student_id` INTEGER, `password` TEXT NOT NULL, `is_active` INTEGER NOT NULL, `is_only_use_old_system` INTEGER NOT NULL, `teaching_evaluation_token` TEXT, `course_select_token` TEXT, `experiment_system_token` TEXT, `changke_session_id` TEXT, `is_upgraded_undergrad` INTEGER NOT NULL, `is_postgraduate` INTEGER NOT NULL, `create_time` INTEGER NOT NULL, `update_time` INTEGER NOT NULL)');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `app_users` (`id` INTEGER NOT NULL, `username` TEXT NOT NULL, `password` TEXT NOT NULL, `is_active` INTEGER NOT NULL, `create_time` INTEGER NOT NULL, `update_time` INTEGER NOT NULL, PRIMARY KEY (`id`))');
         await database.execute(
@@ -553,6 +553,7 @@ class _$UserDao extends UserDao {
                   'teaching_evaluation_token': item.teachingEvaluationToken,
                   'course_select_token': item.courseSelectToken,
                   'experiment_system_token': item.experimentSystemToken,
+                  'changke_session_id': item.changkeSessionId,
                   'is_upgraded_undergrad': item.isUpgradedUndergrad ? 1 : 0,
                   'is_postgraduate': item.isPostgraduate ? 1 : 0,
                   'create_time': _dateTimeConverter.encode(item.createTime),
@@ -574,6 +575,7 @@ class _$UserDao extends UserDao {
                   'teaching_evaluation_token': item.teachingEvaluationToken,
                   'course_select_token': item.courseSelectToken,
                   'experiment_system_token': item.experimentSystemToken,
+                  'changke_session_id': item.changkeSessionId,
                   'is_upgraded_undergrad': item.isUpgradedUndergrad ? 1 : 0,
                   'is_postgraduate': item.isPostgraduate ? 1 : 0,
                   'create_time': _dateTimeConverter.encode(item.createTime),

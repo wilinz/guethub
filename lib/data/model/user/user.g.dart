@@ -18,6 +18,7 @@ extension _$UserAutoequal on User {
         teachingEvaluationToken,
         courseSelectToken,
         experimentSystemToken,
+        changkeSessionId,
         isUpgradedUndergrad,
         isPostgraduate,
         createTime,

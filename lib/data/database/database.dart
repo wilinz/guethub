@@ -34,7 +34,7 @@ part 'database.g.dart'; // the generated code will be there
 
 @TypeConverters(
     [DateTimeConverter, DateTimeNullableConverter, ListIntConverter])
-@Database(version: 21, entities: [
+@Database(version: 22, entities: [
   SemesterSchedule,
   User,
   AppUser,
@@ -101,7 +101,8 @@ final migrationList = [
   migration17to18,
   migration18to19,
   migration19to20,
-  migration20to21
+  migration20to21,
+  migration21to22
 ];
 
 Future<AppDatabase> _getDatabase() async {

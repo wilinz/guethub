@@ -1,16 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:guethub/common/encrypt/cas_new.dart';
-import 'package:guethub/common/encrypt/webvpn.dart';
-import 'package:guethub/common/encrypt/webvpn_new.dart';
 import 'package:guethub/data/model/dynamic_code/dynamic_code.dart';
 import 'package:guethub/data/model/dynamic_code/reauth.dart';
 import 'package:guethub/data/network.dart';
-import 'package:guethub/data/redirect_interceptor.dart';
 import 'package:guethub/logger.dart';
-import 'package:guethub/ui/util/toast.dart';
-import 'package:guethub/util/ext.dart';
 import 'package:html/parser.dart' as htmlParser;
 import 'package:dio/dio.dart';
 
@@ -107,18 +103,18 @@ class LoginService {
       CaptchaHandler captchaHandler, bool isCampusNetwork) async {
     try {
       await loginCas(
-              dio: dio,
-              username: username,
-              password: password,
-              service: "https://bkjw.guet.edu.cn",
-              serviceHomeUrl: "https://bkjw.guet.edu.cn/",
-              successVerify: (resp) {
-                final data = resp.data;
-                final result = data is String && data.contains("用户类型：学生");
-                return result;
-              },
-              isCampusNetwork: isCampusNetwork,
-              captchaHandler: captchaHandler);
+          dio: dio,
+          username: username,
+          password: password,
+          service: "https://bkjw.guet.edu.cn",
+          serviceHomeUrl: "https://bkjw.guet.edu.cn/",
+          successVerify: (resp) {
+            final data = resp.data;
+            final result = data is String && data.contains("用户类型：学生");
+            return result;
+          },
+          isCampusNetwork: isCampusNetwork,
+          captchaHandler: captchaHandler);
     } catch (e) {
       print(e);
     }
@@ -167,7 +163,7 @@ class LoginService {
       required String service,
       required String serviceHomeUrl,
       required CaptchaHandler captchaHandler,
-      required bool Function(Response response) successVerify,
+      required FutureOr<bool> Function(Response response) successVerify,
       String? firstGetUrl,
       Map<String, dynamic>? firstGetQueryParameters}) async {
     // https://portal.guet.edu.cn/sui/
@@ -193,7 +189,7 @@ class LoginService {
 
     var reqUri = resp.requestOptions.uri;
     checkVerification(reqUri);
-    if (successVerify(resp)) {
+    if (await successVerify(resp)) {
       return resp;
     }
     check401(resp);
@@ -236,7 +232,7 @@ class LoginService {
 
     reqUri = resp1.requestOptions.uri;
     checkVerification(reqUri);
-    final success = successVerify(resp1);
+    final success = await successVerify(resp1);
     if (success) {
       return resp;
     }

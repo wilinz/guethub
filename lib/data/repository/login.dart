@@ -11,13 +11,13 @@ import 'package:guethub/data/network.dart';
 import 'package:guethub/data/repository/campus_network.dart';
 import 'package:guethub/data/repository/network_detection.dart';
 import 'package:guethub/data/service/captcha_solver.dart';
+import 'package:guethub/data/service/changke.dart';
 import 'package:guethub/data/service/login.dart';
 import 'package:guethub/logger.dart';
 import 'package:guethub/ui/login/captcha_dialog.dart';
 import 'package:rxdart/rxdart.dart';
 
 class LoginRepository {
-
   final _onLoginEvent = BehaviorSubject<User>();
 
   ValueStream<User> get onLoginEvent => _onLoginEvent.stream;
@@ -27,7 +27,7 @@ class LoginRepository {
       return await CaptchaSolverService.ocr(AppNetwork.get().appDio, image);
     } catch (e) {
       final context = Get.context;
-      if(context != null) {
+      if (context != null) {
         final result = await showDialog(
           context: context,
           barrierDismissible: false,
@@ -79,6 +79,19 @@ class LoginRepository {
           isUpgradedUndergrad: isUpgradedUndergrad,
           isPostgraduate: isPostgraduate,
           isCampusNetwork: isCampusNetwork ?? false);
+
+      try {
+        final sessionId = await ChangKeService.login(
+            await AppNetwork.get(username: username).casDio,
+            username: username,
+            password: password,
+            captchaHandler: captchaHandler,
+            isCampusNetwork: isCampusNetwork ?? false);
+        user.changkeSessionId = sessionId;
+        logger.d("loginChangKe is success");
+      } catch (e) {
+        print(e);
+      }
 
       user.isActive = true;
       await db.userDao.updateUser(user);

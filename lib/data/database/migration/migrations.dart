@@ -205,3 +205,11 @@ final migration20to21 = Migration(20, 21, (database) async {
     await database.execute("ALTER TABLE `users` ADD COLUMN `experiment_system_token` TEXT DEFAULT NULL");
   }
 });
+
+final migration21to22 = Migration(21, 22, (database) async {
+  var res = await database.rawQuery("PRAGMA table_info(users)");
+  bool columnExists = res.any((column) => column['name'] == 'changke_session_id');
+  if (!columnExists) {
+    await database.execute("ALTER TABLE `users` ADD COLUMN `changke_session_id` TEXT DEFAULT NULL");
+  }
+});

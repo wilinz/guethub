@@ -8,6 +8,7 @@ import 'package:guethub/ui/page/app/reset_password/reset_password.dart';
 import 'package:guethub/ui/page/author.dart';
 import 'package:guethub/ui/page/campus_network/campus_network.dart';
 import 'package:guethub/ui/page/campusmap/campusmap.dart';
+import 'package:guethub/ui/page/changke/changke.dart';
 import 'package:guethub/ui/page/course_detail/course_detail.dart';
 import 'package:guethub/ui/page/course_selection/course_selection.dart';
 import 'package:guethub/ui/page/exam_schedule/exam_schedule_page.dart';
@@ -130,11 +131,17 @@ class AppRoute {
 
   static const String privacyPolicyPage = "/privacyPolicyPage";
 
+  static const String changkePage = "/ChangkePage";
+
   static List<GetPage> routes = [
+    GetPage(
+      name: changkePage,
+      page: () => ChangkePage(),
+    ),
     GetPage(
       name: webView,
       page: () => WebView(args: Get.arguments),
-    ),   
+    ),
     GetPage(
       name: userAgreementPage,
       page: () => UserAgreementPage(),
