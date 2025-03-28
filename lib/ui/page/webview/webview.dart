@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dart_extensions/dart_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -11,6 +12,7 @@ import 'package:guethub/util/platform.dart';
 import 'package:kt_dart/kt.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -380,9 +382,48 @@ class _WebViewState extends State<_WebView> {
                     });
                   },
                   onPermissionRequest: (controller, request) async {
+                    if (request.resources.any((r) =>
+                        r == PermissionResourceType.CAMERA_AND_MICROPHONE ||
+                        r == PermissionResourceType.CAMERA ||
+                        r == PermissionResourceType.MICROPHONE)) {
+                      try {
+                        var cameraStatus = await [Permission.camera, Permission.microphone].request();
+                        if (cameraStatus.values.all((e) => e == PermissionStatus.granted)) {
+                          print("camera and microphone granted");
+                          return PermissionResponse(
+                              action: PermissionResponseAction.GRANT,
+                              resources: [
+                                PermissionResourceType.CAMERA_AND_MICROPHONE,
+                                PermissionResourceType.CAMERA,
+                                PermissionResourceType.MICROPHONE,
+                              ]);
+                        }
+                        print("camera and microphone deny");
+                        return PermissionResponse(
+                            action: PermissionResponseAction.DENY,
+                            resources: [
+                              PermissionResourceType.CAMERA_AND_MICROPHONE,
+                              PermissionResourceType.CAMERA,
+                              PermissionResourceType.MICROPHONE,
+                            ]);
+                      } catch (e) {
+                        print("camera and microphone error: ${e}");
+                        return PermissionResponse(
+                            action: PermissionResponseAction.PROMPT,
+                            resources: [
+                              PermissionResourceType.CAMERA_AND_MICROPHONE,
+                              PermissionResourceType.CAMERA,
+                              PermissionResourceType.MICROPHONE,
+                            ]);
+                      }
+                    }
                     return PermissionResponse(
-                        resources: request.resources,
-                        action: PermissionResponseAction.GRANT);
+                        action: PermissionResponseAction.GRANT,
+                        resources: [
+                          PermissionResourceType.CAMERA_AND_MICROPHONE,
+                          PermissionResourceType.CAMERA,
+                          PermissionResourceType.MICROPHONE,
+                        ]);
                   },
                   onTitleChanged: (controller, title) {
                     if (title != null) {
