@@ -17,7 +17,7 @@ EmptyClassroomQueryBody _$EmptyClassroomQueryBodyFromJson(
           : DateTimeSegmentCmd.fromJson(
               json['dateTimeSegmentCmd'] as Map<String, dynamic>),
       roomType: (json['roomType'] as num?)?.toInt(),
-      seatsForLessonGte: json['seatsForLessonGte'] as String? ?? '',
+      seatsForLessonGte: json['seatsForLessonGte'] as String?,
       hasDataPermission: json['hasDataPermission'] as bool? ?? false,
     );
 
