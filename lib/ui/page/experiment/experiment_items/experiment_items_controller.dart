@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:get/get_rx/get_rx.dart';
+import 'package:guethub/data/model/experiment/experiment_grouped_items_response/experiment_grouped_items_response.dart';
+import 'package:guethub/data/model/experiment/experiment_items_data_type.dart';
 import 'package:guethub/data/model/experiment/experiment_items_response/experiment_items_response.dart';
 import 'package:guethub/data/repository/experiment.dart';
 import 'package:guethub/ui/page/experiment/experiment_items/experiment_items.dart';
@@ -8,6 +10,8 @@ import 'package:guethub/logger.dart';
 
 class ExperimentItemsController extends GetxController {
   final experimentItems = <ExperimentItems>[].obs;
+  final experimentGroupedItems = <ExperimentGroupedItems>[].obs;
+  final experimentItemsDataType = ExperimentItemsDataType.typeDefault.obs;
 
   var isLoading = false.obs; // Tracks loading state
   var hasError = false.obs;
@@ -26,10 +30,18 @@ class ExperimentItemsController extends GetxController {
     try {
       isLoading(true);
       hasError(false);
-      experimentItems.value =
-          (await ExperimentRepository.get().getExperimentItems(taskId: args.taskId));
-    } catch (e) {
-      logger.e(e);
+      final experimentItemsResponse = (await ExperimentRepository.get()
+          .getExperimentItems(taskId: args.taskId));
+      if (experimentItemsResponse is ExperimentItemsResponse) {
+        experimentItemsDataType.value = ExperimentItemsDataType.typeDefault;
+        experimentItems.value =
+            experimentItemsResponse.result.expand((e) => e.list).toList();
+      } else if (experimentItemsResponse is ExperimentGroupedItemsResponse) {
+        experimentItemsDataType.value = ExperimentItemsDataType.typeGroup;
+        experimentGroupedItems.value = experimentItemsResponse.result;
+      }
+    } catch (e, st) {
+      logger.e(e, stackTrace: st);
       hasError(true);
       toastFailure0("获取数据失败", error: e);
     } finally {
@@ -46,9 +58,55 @@ class ExperimentItemsController extends GetxController {
     }
   }
 
-  Future<void> unselect({required String subjectId, required String stuId}) async {
-    final resp = await ExperimentRepository.get().dropExperimentCourse(
-        subjectId: subjectId, taskId: args.taskId, stuId: stuId);
-    toast(resp.message);
+  Future<void> selectGroup(String groupId) async {
+    try {
+      final resp = await ExperimentRepository.get().selectGroupedExperimentCourse(
+          groupId: groupId, selectWey: 1, taskId: args.taskId);
+      toast(resp.message);
+      if(resp.success) {
+        isLoading(true);
+        await getData();
+      }
+    } catch (e) {
+      logger.e(e);
+      hasError(true);
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  Future<void> unselectGroup(String groupId) async {
+    try {
+      final resp = await ExperimentRepository.get()
+              .dropGroupedExperimentCourse(groupId: groupId, taskId: args.taskId);
+      toast(resp.message);
+      if(resp.success) {
+        isLoading(true);
+        await getData();
+      }
+    } catch (e) {
+      logger.e(e);
+      hasError(true);
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  Future<void> unselect(
+      {required String subjectId, required String stuId}) async {
+    try {
+      final resp = await ExperimentRepository.get().dropExperimentCourse(
+          subjectId: subjectId, taskId: args.taskId, stuId: stuId);
+      toast(resp.message);
+      if(resp.success) {
+        isLoading(true);
+        await getData();
+      }
+    } catch (e) {
+      logger.e(e);
+      hasError(true);
+    } finally {
+      isLoading(false);
+    }
   }
 }

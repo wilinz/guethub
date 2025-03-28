@@ -50,13 +50,22 @@ class ExperimentBatchController extends GetxController {
   }
 
   Future<void> select(List<String> itemIds) async {
-    final resp = await ExperimentRepository.get().selectExperimentCourse(
-        itemIds: itemIds,
-        selectWey: 1,
-        taskId: args.taskId,
-        stuId: args.stuId);
-    toast(resp.message);
+    try {
+      final resp = await ExperimentRepository.get().selectExperimentCourse(
+          itemIds: itemIds,
+          selectWey: 1,
+          taskId: args.taskId,
+          stuId: args.stuId);
+      toast(resp.message);
+      if (resp.success) {
+        isLoading(true);
+        await getData();
+      }
+    } catch (e) {
+      logger.e(e);
+      hasError(true);
+    } finally {
+      isLoading(false);
+    }
   }
-
-
 }

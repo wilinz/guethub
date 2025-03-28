@@ -27,6 +27,13 @@ class ExperimentItemsResponse {
   @JsonKey(name: "timestamp", defaultValue: 0)
   int timestamp;
 
+  void setSubItemType(){
+    for (final e in result) {
+      for (final item in e.list) {
+        item.type = e.type;
+      }
+    }
+  }
 
   factory ExperimentItemsResponse.fromJson(Map<String, dynamic> json) => _$ExperimentItemsResponseFromJson(json);
   

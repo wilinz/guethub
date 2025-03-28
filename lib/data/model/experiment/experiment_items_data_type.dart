@@ -1,0 +1,4 @@
+enum ExperimentItemsDataType {
+  typeDefault,
+  typeGroup;
+}

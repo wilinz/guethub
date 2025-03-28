@@ -2,10 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:guethub/data/model/experiment/experiment_batch_response/experiment_batch_response.dart';
 import 'package:guethub/data/model/experiment/experiment_common_response/experiment_common_response.dart';
 import 'package:guethub/data/model/experiment/experiment_courses_response/experiment_courses_response.dart';
+import 'package:guethub/data/model/experiment/experiment_grouped_items_response/experiment_grouped_items_response.dart';
 import 'package:guethub/data/model/experiment/experiment_items_response/experiment_items_response.dart';
 import 'package:guethub/data/model/experiment/teacher_calendar_response/teacher_calendar_response.dart';
 import 'package:guethub/data/network.dart';
-import 'package:guethub/data/redirect_interceptor.dart';
 import 'package:guethub/data/service/experiment.dart';
 
 class ExperimentRepository {
@@ -22,19 +22,15 @@ class ExperimentRepository {
   /// 获取实验项目列表
   ///
   /// [taskId] 示例: "sync252750"
-  Future<List<ExperimentItems>> getExperimentItems(
-      {required String taskId}) async {
+  Future<Object> getExperimentItems({required String taskId}) async {
     final resp =
         await ExperimentService.getExperimentItems(await dio, taskId: taskId);
 
-    for (final e in resp.result) {
-      for (final item in e.list) {
-        item.type = e.type;
-      }
+    if (resp is ExperimentItemsResponse) {
+      return resp..setSubItemType();
     }
 
-    return resp.result.expand((e) => e.list).toList();
-    ;
+    return resp as ExperimentGroupedItemsResponse;
   }
 
   /// 获取实验批次列表
@@ -45,6 +41,18 @@ class ExperimentRepository {
           {required String subjectId, required String taskId}) async =>
       ExperimentService.getExperimentBatch(await dio,
           subjectId: subjectId, taskId: taskId);
+
+  Future<ExperimentCommonResponse> selectGroupedExperimentCourse(
+          {required String groupId,
+          required int selectWey,
+          required String taskId}) async =>
+      ExperimentService.selectGroupedExperimentCourse(await dio,
+          groupId: groupId, selectWey: selectWey, taskId: taskId);
+
+  Future<ExperimentCommonResponse> dropGroupedExperimentCourse(
+          {required String groupId, required String taskId}) async =>
+      ExperimentService.dropGroupedExperimentCourse(await dio,
+          groupId: groupId, taskId: taskId);
 
   /// 选课
   ///

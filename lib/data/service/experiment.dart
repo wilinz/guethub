@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:guethub/data/model/experiment/experiment_batch_response/experiment_batch_response.dart';
 import 'package:guethub/data/model/experiment/experiment_common_response/experiment_common_response.dart';
 import 'package:guethub/data/model/experiment/experiment_courses_response/experiment_courses_response.dart';
+import 'package:guethub/data/model/experiment/experiment_grouped_items_response/experiment_grouped_items_response.dart';
 import 'package:guethub/data/model/experiment/experiment_items_response/experiment_items_response.dart';
 import 'package:guethub/data/model/experiment/teacher_calendar_response/teacher_calendar_response.dart';
 import 'package:guethub/data/redirect_interceptor.dart';
@@ -59,7 +60,7 @@ class ExperimentService {
   /// 获取实验项目列表
   ///
   /// [taskId] 示例: "sync252750"
-  static Future<ExperimentItemsResponse> getExperimentItems(Dio dio,
+  static Future<Object> getExperimentItems(Dio dio,
       {required String taskId}) async {
     const String url =
         'guet-lab-system/experiment/mesTeachTask/getSubjectSelectionList';
@@ -70,7 +71,11 @@ class ExperimentService {
     };
 
     final response = await dio.get(url, queryParameters: queryParams);
-    return ExperimentItemsResponse.fromJson(response.data);
+    final data = response.data;
+    if (data?["result"]?[0]?["groupInfo"] != null) {
+      return ExperimentGroupedItemsResponse.fromJson(data);
+    }
+    return ExperimentItemsResponse.fromJson(data);
   }
 
   /// 获取实验批次列表
@@ -91,6 +96,41 @@ class ExperimentService {
 
     final response = await dio.get(url, queryParameters: queryParams);
     return ExperimentBatchResponse.fromJson(response.data);
+  }
+
+  static Future<ExperimentCommonResponse> selectGroupedExperimentCourse(
+    Dio dio, {
+    required String groupId,
+    required int selectWey,
+    required String taskId}) async {
+    const String url =
+        'guet-lab-system/schedule/ScheduleItemBySubject/stuSelectGroup';
+
+    final Map<String, dynamic> queryParams = {
+      '_t': DateTime.now().millisecondsSinceEpoch,
+      'groupId': groupId,
+      'selectWey': selectWey,
+      'taskId': taskId,
+    };
+
+    final response = await dio.get(url, queryParameters: queryParams);
+    return ExperimentCommonResponse.fromJson(response.data);
+  }
+
+  static Future<ExperimentCommonResponse> dropGroupedExperimentCourse(Dio dio,
+      {required String groupId,
+        required String taskId}) async {
+    const String url =
+        'guet-lab-system/schedule/ScheduleItemBySubject/stuDropCourseByGroup';
+
+    final Map<String, dynamic> queryParams = {
+      '_t': DateTime.now().millisecondsSinceEpoch,
+      'groupId': groupId,
+      'taskId': taskId,
+    };
+
+    final response = await dio.get(url, queryParameters: queryParams);
+    return ExperimentCommonResponse.fromJson(response.data);
   }
 
   /// 选课
