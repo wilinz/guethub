@@ -5,7 +5,7 @@
 隐私政策：[privacy_policy.md](privacy_policy.md)
 
 ## 目前支持本科生教务系统（包含专升本）使用，未支持研究生教务系统
-支持 Android IOS 未上架，Windows Linux MacOS 可以使用，但未做发布
+已发布 Android IOS 版本，Windows Linux MacOS 可以使用，但未做发布
 
 下载地址 [https://www.guethub.net](https://www.guethub.net)
 
