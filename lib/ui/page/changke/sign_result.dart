@@ -66,7 +66,7 @@ class ChangkeSignResult extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  child: Text("完成", style: TextStyle(fontSize: 16)),
+                  child: Text("返回", style: TextStyle(fontSize: 16)),
                 ),
               ),
             )

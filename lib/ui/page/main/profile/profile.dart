@@ -160,7 +160,7 @@ class _ProfilePageState extends State<ProfilePage>
                                   .pushNamed(AppRoute.changkePage);
                             },
                             leading: SvgPicture.asset("assets/images/tron_class.svg"),
-                            title: Text("畅课智慧教学平台"),
+                            title: Text("畅课教学平台（新）"),
                             trailing: Icon(Icons.arrow_forward_ios_outlined),
                           ),
                           if (c.isUpgradedUndergrad.isFalse)
@@ -250,7 +250,7 @@ class _ProfilePageState extends State<ProfilePage>
                             },
                             leading: Icon(Icons.link),
                             // Icon for "连接校园网"
-                            title: Text("常用网站（新）"),
+                            title: Text("常用网站"),
                             trailing: Icon(Icons.arrow_forward_ios_outlined),
                           ),
                           ListTile(

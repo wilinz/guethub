@@ -6,6 +6,8 @@ import 'package:guethub/logger.dart';
 import 'package:guethub/ui/page/changke/scan_qr.dart';
 import 'package:guethub/ui/page/changke/sign_result.dart';
 import 'package:guethub/ui/util/toast.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 
 class ChangkeController extends GetxController {
@@ -34,12 +36,27 @@ class ChangkeController extends GetxController {
     } else if (hour >= 18 && hour < 24) {
       greeting.value = "晚上好，放松一下吧！";
     } else {
-      greeting.value = "深夜了，请注意休息";
+      greeting.value = "夜深了，请注意休息";
     }
   }
 
   Future<void> scanQr() async {
-    final code = await Get.to(ScanSign());
+
+    if(GetPlatform.isMobile) {
+      final permission = await Permission.camera.request();
+      if (!permission.isGranted) {
+        toast("请允许相机权限才能进行扫描二维码");
+        return;
+      }
+    }
+
+    final codeResult = await Get.to<BarcodeCapture>(Scan());
+    final code = codeResult?.barcodes.firstOrNull?.rawValue;
+    if(code == null){
+      toastFailure0("未识别到二维码");
+      return;
+    }
+
     final codeData = parseChangkeScanUrl(code);
 
     if (!(codeData is Map)) {

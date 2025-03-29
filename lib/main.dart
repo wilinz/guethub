@@ -74,15 +74,12 @@ Future<void> main() async {
 Future<void> initDesktopWindow() async {
   if (PlatformUtil.isDesktop()) {
     final screen = await getCurrentScreen();
-    logger.d(screen?.visibleFrame.width);
-    logger.d(screen?.visibleFrame.height);
 
     final sc = Platform.isMacOS ? 1.0 : (screen?.scaleFactor ?? 1);
     final padding = 32 / sc;
     final height =
         ((screen?.visibleFrame.height ?? 450) + padding * 2) - padding * 2;
     final size = Size(height * 1.5, height) / sc;
-    logger.d(size);
 
     // 必须加上这一行。
     await windowManager.ensureInitialized();

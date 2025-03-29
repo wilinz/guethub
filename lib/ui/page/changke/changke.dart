@@ -17,6 +17,31 @@ class ChangkePage extends StatelessWidget {
         title: const Text('桂林电子科大学'),
         centerTitle: true,
       ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: FilledButton(
+            onPressed: () {
+              final url = "https://mobile.guet.edu.cn";
+              Get.toNamed(AppRoute.webView, arguments: WebViewArgs(url: url));
+            },
+            style: ButtonStyle(
+              shape: WidgetStateProperty.all(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              backgroundColor: WidgetStateProperty.all(
+                  Color(0xff1DB6C2 /* : 0xffff4853*/)),
+              elevation: WidgetStateProperty.all(0), // 关闭按钮自身的阴影
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              child: Text("完整版请点此打开网页版", style: TextStyle(fontSize: 16)),
+            ),
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

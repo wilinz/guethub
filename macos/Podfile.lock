@@ -16,9 +16,14 @@ PODS:
     - OrderedSet (~> 6.0.3)
   - flutter_localization (0.0.1):
     - FlutterMacOS
+  - flutter_udid (0.0.1):
+    - FlutterMacOS
+    - SAMKeychain
   - FlutterMacOS (1.0.0)
   - image_editor_common (1.0.0):
     - Flutter
+    - FlutterMacOS
+  - mobile_scanner (6.0.2):
     - FlutterMacOS
   - OrderedSet (6.0.3)
   - package_info_plus (0.0.1):
@@ -28,6 +33,7 @@ PODS:
     - FlutterMacOS
   - rust_module (0.0.1):
     - FlutterMacOS
+  - SAMKeychain (1.5.3)
   - screen_retriever (0.0.1):
     - FlutterMacOS
   - share_plus (0.0.1):
@@ -73,8 +79,10 @@ DEPENDENCIES:
   - flutter_image_compress_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_image_compress_macos/macos`)
   - flutter_inappwebview_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_inappwebview_macos/macos`)
   - flutter_localization (from `Flutter/ephemeral/.symlinks/plugins/flutter_localization/macos`)
+  - flutter_udid (from `Flutter/ephemeral/.symlinks/plugins/flutter_udid/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - image_editor_common (from `Flutter/ephemeral/.symlinks/plugins/image_editor_common/macos`)
+  - mobile_scanner (from `Flutter/ephemeral/.symlinks/plugins/mobile_scanner/macos`)
   - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
   - rust_module (from `Flutter/ephemeral/.symlinks/plugins/rust_module/macos`)
@@ -90,6 +98,7 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - OrderedSet
+    - SAMKeychain
     - sqlite3
 
 EXTERNAL SOURCES:
@@ -109,10 +118,14 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_inappwebview_macos/macos
   flutter_localization:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_localization/macos
+  flutter_udid:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_udid/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
   image_editor_common:
     :path: Flutter/ephemeral/.symlinks/plugins/image_editor_common/macos
+  mobile_scanner:
+    :path: Flutter/ephemeral/.symlinks/plugins/mobile_scanner/macos
   package_info_plus:
     :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos
   path_provider_foundation:
@@ -145,12 +158,15 @@ SPEC CHECKSUMS:
   flutter_image_compress_macos: e68daf54bb4bf2144c580fd4d151c949cbf492f0
   flutter_inappwebview_macos: 13a1fb94e7d1a878fb5d7b02089a64697ca54a2b
   flutter_localization: 3cda759884c7dab4466fe963d97fba723a492666
+  flutter_udid: d26e455e8c06174e6aff476e147defc6cae38495
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   image_editor_common: f480572b5f23a5e15007b2aa86571675e1e8d16a
+  mobile_scanner: 0e365ed56cad24f28c0fd858ca04edefb40dfac3
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   package_info_plus: f0052d280d17aa382b932f399edf32507174e870
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
-  rust_module: 46a07dbb59ff9f77f767d0bc300a07c8ec40ae65
+  rust_module: cc73cd2e902c23b683801f8fc5afbd8b76beb75e
+  SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
   screen_retriever: dce2684e475a7e5aada582121e18ba76551bc912
   share_plus: e36d02b62cbda47c70f779710768a498b099aa10
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
