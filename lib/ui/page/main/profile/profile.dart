@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:guethub/check_update.dart';
 import 'package:guethub/package_info.dart';
@@ -158,8 +159,8 @@ class _ProfilePageState extends State<ProfilePage>
                               Navigator.of(context)
                                   .pushNamed(AppRoute.changkePage);
                             },
-                            leading: Icon(Icons.bookmark_outline_outlined),
-                            title: Text("畅课"),
+                            leading: SvgPicture.asset("assets/images/tron_class.svg"),
+                            title: Text("畅课智慧教学平台"),
                             trailing: Icon(Icons.arrow_forward_ios_outlined),
                           ),
                           if (c.isUpgradedUndergrad.isFalse)

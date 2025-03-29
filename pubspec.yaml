@@ -122,6 +122,7 @@ dependencies:
     path: rust_module
   fl_channel: ^1.0.3
   flutter_udid: ^4.0.0
+  flutter_scankit: ^2.0.6
 
 
 dev_dependencies:

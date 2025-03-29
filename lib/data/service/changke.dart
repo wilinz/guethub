@@ -92,7 +92,7 @@ class ChangKeService {
     return sessionId;
   }
 
-  static Future<String> signQr(Dio dio,
+  static Future<Map<String, dynamic>> signQr(Dio dio,
       {required String rollcallId,
       required String data,
       required deviceId}) async {
@@ -103,7 +103,7 @@ class ChangKeService {
       "deviceId": deviceId,
     };
     final resp = await dio.put(url,
-        data: body, options: Options(responseType: ResponseType.plain));
-    return resp.data as String;
+        data: body, options: Options(responseType: ResponseType.json));
+    return resp.data;
   }
 }
