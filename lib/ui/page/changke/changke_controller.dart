@@ -50,7 +50,7 @@ class ChangkeController extends GetxController {
       }
     }
 
-    final codeResult = await Get.to<BarcodeCapture>(Scan());
+    final codeResult = await Get.to<BarcodeCapture>(() => Scan());
     final code = codeResult?.barcodes.firstOrNull?.rawValue;
     if(code == null){
       toastFailure0("未识别到二维码");
@@ -79,7 +79,7 @@ class ChangkeController extends GetxController {
     final message = resp['message'];
     final mappingMessage = getMappingMessage(message);
 
-    Get.to(ChangkeSignResult(successful: true, message: mappingMessage));
+    Get.to(() => ChangkeSignResult(successful: true, message: mappingMessage));
     logger.i("签到结果：${message}");
   }
 

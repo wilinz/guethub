@@ -88,7 +88,7 @@ dependencies:
   photo_view: ^0.15.0
   saver_gallery: ^3.0.5
   device_info_plus: ^11.2.0
-  permission_handler: ^11.3.1
+  permission_handler: ^11.4.0
   dart_jsonwebtoken: ^2.14.0
   infinite_scroll_pagination: ^4.0.0
   emoji_picker_flutter: ^4.2.0
