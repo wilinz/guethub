@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:guethub/data/network.dart';
 import 'package:guethub/data/service/changke.dart';
@@ -42,45 +44,50 @@ class ChangkeController extends GetxController {
 
   Future<void> scanQr() async {
 
-    if(GetPlatform.isMobile) {
-      final permission = await Permission.camera.request();
-      if (!permission.isGranted) {
-        toast("请允许相机权限才能进行扫描二维码");
-        return;
-      }
+    try {
+      if(GetPlatform.isMobile) {
+            final permission = await Permission.camera.request();
+            if (!permission.isGranted) {
+              toast("请允许相机权限才能进行扫描二维码");
+              return;
+            }
+          }
+
+      final codeResult = await Get.to<BarcodeCapture>(() => Scan());
+      final code = codeResult?.barcodes.firstOrNull?.rawValue;
+      if(code == null){
+            toastFailure0("未识别到二维码");
+            return;
+          }
+
+      final codeData = parseChangkeScanUrl(code);
+
+      if (!(codeData is Map)) {
+            toastFailure0("二维码格式错误: ${codeData.runtimeType}");
+            return;
+          }
+
+      final rollcallId = codeData['rollcallId']?.toString();
+      final data = codeData['data'];
+
+      if (rollcallId == null || data == null) {
+            toastFailure0("二维码格式错误");
+            return;
+          }
+      toast("正在签到，请稍后");
+
+      final deviceId = Uuid().v4();
+      final resp = await ChangKeService.signQr(await AppNetwork.get().changkeDio,
+              rollcallId: rollcallId, data: data, deviceId: deviceId);
+      final String message = resp['message'] ?? JsonEncoder.withIndent("  ").convert(resp);
+      final mappingMessage = getMappingMessage(message);
+
+      Get.to(() => ChangkeSignResult(successful: true, message: mappingMessage));
+      logger.i("签到结果：${message}");
+    } catch (e) {
+      print(e);
+      toastFailure0("出错了：", error: e);
     }
-
-    final codeResult = await Get.to<BarcodeCapture>(() => Scan());
-    final code = codeResult?.barcodes.firstOrNull?.rawValue;
-    if(code == null){
-      toastFailure0("未识别到二维码");
-      return;
-    }
-
-    final codeData = parseChangkeScanUrl(code);
-
-    if (!(codeData is Map)) {
-      toastFailure0("二维码格式错误: ${codeData.runtimeType}");
-      return;
-    }
-
-    final rollcallId = codeData['rollcallId']?.toString();
-    final data = codeData['data'];
-
-    if (rollcallId == null || data == null) {
-      toastFailure0("二维码格式错误");
-      return;
-    }
-    toast("正在签到，请稍后");
-
-    final deviceId = Uuid().v4();
-    final resp = await ChangKeService.signQr(await AppNetwork.get().changkeDio,
-        rollcallId: rollcallId, data: data, deviceId: deviceId);
-    final message = resp['message'];
-    final mappingMessage = getMappingMessage(message);
-
-    Get.to(() => ChangkeSignResult(successful: true, message: mappingMessage));
-    logger.i("签到结果：${message}");
   }
 
   String getMappingMessage(String key) => messageMap[key] ?? key;
