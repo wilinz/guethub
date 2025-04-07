@@ -43,47 +43,58 @@ class ChangkeController extends GetxController {
   }
 
   Future<void> scanQr() async {
-
     try {
-      if(GetPlatform.isMobile) {
-            final permission = await Permission.camera.request();
-            if (!permission.isGranted) {
-              toast("请允许相机权限才能进行扫描二维码");
-              return;
-            }
-          }
+      if (GetPlatform.isMobile) {
+        final permission = await Permission.camera.request();
+        if (!permission.isGranted) {
+          toast("请允许相机权限才能进行扫描二维码");
+          return;
+        }
+      }
 
       final codeResult = await Get.to<BarcodeCapture>(() => Scan());
       final code = codeResult?.barcodes.firstOrNull?.rawValue;
-      if(code == null){
-            toastFailure0("未识别到二维码");
-            return;
-          }
+      if (code == null) {
+        toastFailure0("未识别到二维码");
+        return;
+      }
 
       final codeData = parseChangkeScanUrl(code);
 
       if (!(codeData is Map)) {
-            toastFailure0("二维码格式错误: ${codeData.runtimeType}");
-            return;
-          }
+        toastFailure0("二维码格式错误: ${codeData.runtimeType}");
+        return;
+      }
 
       final rollcallId = codeData['rollcallId']?.toString();
       final data = codeData['data'];
 
       if (rollcallId == null || data == null) {
-            toastFailure0("二维码格式错误");
-            return;
-          }
+        toastFailure0("二维码格式错误");
+        return;
+      }
       toast("正在签到，请稍后");
 
       final deviceId = Uuid().v4();
-      final resp = await ChangKeService.signQr(await AppNetwork.get().changkeDio,
-              rollcallId: rollcallId, data: data, deviceId: deviceId);
-      final String message = resp['message'] ?? JsonEncoder.withIndent("  ").convert(resp);
-      final mappingMessage = getMappingMessage(message);
+      final response = await ChangKeService.signQr(
+          await AppNetwork.get().changkeDio,
+          rollcallId: rollcallId,
+          data: data,
+          deviceId: deviceId);
 
-      Get.to(() => ChangkeSignResult(successful: true, message: mappingMessage));
-      logger.i("签到结果：${message}");
+      final responseData = response.data;
+      final int? id = responseData?["id"];
+      final String? status = responseData?["status"];
+      final bool isSuccessful =
+          response.statusCode == 200 && id != null && status == "on_call";
+
+      String message = isSuccessful
+          ? "签到成功"
+          : getMappingMessage(responseData?['message'] ??
+              JsonEncoder.withIndent("  ").convert(responseData));
+
+      Get.to(
+          () => ChangkeSignResult(successful: isSuccessful, message: message));
     } catch (e) {
       print(e);
       toastFailure0("出错了：", error: e);
@@ -108,7 +119,6 @@ class ChangkeController extends GetxController {
     "outofScope": "当前定位信息获取异常，可能导致签到失败，请尝试重新签到",
     "fetchStudentsError": "学生信息获取失败，请稍后重试",
     "deviceAlreadyInUse": "已有学生使用该设备签到，请更换设备再试",
-
     "answer": "去签到",
     "answered": "已签到",
     "updatedAt": "最后修改时间",
@@ -121,7 +131,6 @@ class ChangkeController extends GetxController {
     "success": "签到成功",
     "failed": "签到失败",
     "pleaseInputPassword": "请输入签到密码",
-
     "rollcallCode": "签到密码",
     "noTimeLimit": "不限时",
     "absent": "未到",

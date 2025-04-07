@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ChangkeSignResult extends StatelessWidget {
-  final bool? successful;
+  final bool successful;
   final String message;
 
   const ChangkeSignResult(
@@ -23,11 +23,13 @@ class ChangkeSignResult extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // if(!successful)
-                    //   Padding(
-                    //     padding: const EdgeInsets.symmetric(horizontal: 64.0, vertical: 32),
-                    //     child: Image.asset("assets/images/qr_sign_failed.png"),
-                    //   ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 64.0, vertical: 32),
+                      child: Image.asset(successful
+                          ? "assets/images/qr_sign_ok.png"
+                          : "assets/images/qr_sign_failed.png"),
+                    ),
                     Text("签到结果",
                         style: Theme.of(context).textTheme.titleMedium),
                     SizedBox(height: 12),
@@ -43,7 +45,7 @@ class ChangkeSignResult extends StatelessWidget {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 10,
                     spreadRadius: 1,
                     offset: Offset(0, 0), // 可根据需要调整阴影偏移
@@ -61,7 +63,7 @@ class ChangkeSignResult extends StatelessWidget {
                     ),
                   ),
                   backgroundColor: WidgetStateProperty.all(
-                      Color(0xff1DB6C2 /* : 0xffff4853*/)),
+                      Color(successful ? 0xff1DB6C2 : 0xffff4853)),
                   elevation: WidgetStateProperty.all(0), // 关闭按钮自身的阴影
                 ),
                 child: Padding(
