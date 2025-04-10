@@ -14,6 +14,7 @@ import 'package:guethub/ui/page/guet_login/login.dart';
 import 'package:guethub/ui/page/main/profile/profile_vm.dart';
 import 'package:guethub/ui/route.dart';
 import 'package:guethub/ui/util/toast.dart';
+import 'package:guethub/ui/widget/svg_icon.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -159,7 +160,9 @@ class _ProfilePageState extends State<ProfilePage>
                               Navigator.of(context)
                                   .pushNamed(AppRoute.changkePage);
                             },
-                            leading: SvgPicture.asset("assets/images/tron_class.svg"),
+                            leading: SvgIcon.asset(
+                              'assets/images/tron_class.svg',
+                            ),
                             title: Text("畅课教学平台（新）"),
                             trailing: Icon(Icons.arrow_forward_ios_outlined),
                           ),
